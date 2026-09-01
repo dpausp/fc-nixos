@@ -1,0 +1,70 @@
+---
+search:
+  exclude: true
+---
+
+!!! warning
+    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/webproxy.md) for optimized support.
+
+# Varnish (Webproxy) { #nixos-webproxy }
+
+This role provides Varnish Cache, the high-performance HTTP accelerator.
+By default, the role uses the version 7.7.x. \
+As this version is out of upstream support, we recommend you upgrade to varnish 8.0.x by setting `services.varnish.package = pkgs.varnish80;` after checking for [breaking changes](https://vinyl-cache.org/docs/8.0/whats-new/upgrading-8.0.html) of that update.
+
+## How we differ from what you are used to
+
+Here is how we differ from what you already know from common Linux distributions
+and how you are used to configure, start, stop and maintain these packages.
+
+- **configuration file locations:**
+
+  Since we use NixOS, configuration files have to be edited in
+  `/etc/local/nixos`, followed by a NixOS rebuild which copies them into
+  the Nix store and activates the new configuration. To do so, run the command
+  `sudo fc-manage switch`.
+
+- **service control:**
+
+  We use `systemd` to control processes. You can use familiar commands
+  like `sudo systemctl restart varnish` to control services.
+  However, remember that invoking `sudo fc-manage switch` is
+  necessary to put configuration changes into effect. A simple restart is not
+  sufficient. For further information, also see [nixos-local](../../platform-releases/fc-25.11-production/local.md#nixos-local).
+
+### Role configuration
+
+The role currently supports two different ways to configure Varnish.
+Please note that all configuration has to be performed as a service user.
+
+The recommended way is to use Nix. For an overview of the available configuration
+options, see the Varnish module in our [infrastructure repository](https://github.com/flyingcircusio/fc-nixos).
+As with all NixOS modules, put your configuration into an appropriately named file
+in the `/etc/local/nixos` directory, e.g. `/etc/local/nixos/varnish.nix`.
+
+You can also put your verbatim Varnish configuration into `/etc/local/varnish/default.vcl`.
+
+The role passes a handful of command line arguments to Varnish to
+ensure reasonable default behaviour. If you wish to pass extra command
+line arguments to Varnish, then you should use the provided
+`flyingcircus.services.varnish.extraCommandLine` NixOS
+option. Arguments specified using this option (which may be defined
+multiple times) will be merged into the list of arguments passed to
+Varnish along with the role defaults.
+
+### Monitoring
+
+- We monitor that the varnishd process is running.
+
+- Please add a custom http checks which suite your needs to to `/etc/local/sensu-client`, for instance:
+
+  ```
+  {
+    "varnish": {
+      "command": "check_http -H localhost -p 8080",
+      "notification" : "varnish broken",
+      "interval": 120,
+      "standalone": true
+    }
+  }
+  ```
