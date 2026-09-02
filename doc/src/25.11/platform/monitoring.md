@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/monitoring.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Monitoring { #nixos-monitoring }
 
@@ -43,7 +43,7 @@ Example:
 ```
 
 To activate the checks, run `sudo fc-manage switch`.
-For further information about local configuration, also see [nixos-local](../../platform-releases/fc-25.11-production/local.md#nixos-local).
+For further information about local configuration, also see [nixos-local](local.md#nixos-local).
 
 The following packages are available in the sensu check PATH:
 

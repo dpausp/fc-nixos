@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/matomo.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Matomo { #nixos-matomo }
 
@@ -22,7 +22,7 @@ with an automatically managed Letsencrypt certificate.
 
 Matomo requires a MySQL-compatible database which is
 not activated automatically. You can put the database on the same machine or
-use a separate one. We recommend the [percona84](../../platform-releases/fc-25.11-production/mysql.md#nixos-mysql) role for
+use a separate one. We recommend the [percona84](mysql.md#nixos-mysql) role for
 the database.
 
 
@@ -40,7 +40,7 @@ Before activating the `matomo` role, add at least the following custom config:
   };
 }
 ```
-See [nixos-custom-modules](../../platform-releases/fc-25.11-production/local.md#nixos-custom-modules) for general information about writing custom NixOS
+See [nixos-custom-modules](../platform/local.md#nixos-custom-modules) for general information about writing custom NixOS
 modules in `/etc/local/nixos`.
 
 ### Create the database

@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/mysql.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # MySQL { #nixos-mysql }
 
@@ -81,7 +81,7 @@ first startup, the NixOS option `services.percona.initialScript` can be set to a
 file containing such SQL commands.
 
 !!! caution
-    This is mainly useful for [nixos-devhost](../../platform-releases/fc-25.11-production/devhost.md#nixos-devhost) deployments, as the script will only
+    This is mainly useful for [nixos-devhost](devhost.md#nixos-devhost) deployments, as the script will only
     be executed at first startup and is ignored afterwards.
 
     Enabling a Percona role first and only setting an initial script later won't have

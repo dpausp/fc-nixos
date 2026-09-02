@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/webproxy.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Varnish (Webproxy) { #nixos-webproxy }
 
@@ -30,7 +30,7 @@ and how you are used to configure, start, stop and maintain these packages.
   like `sudo systemctl restart varnish` to control services.
   However, remember that invoking `sudo fc-manage switch` is
   necessary to put configuration changes into effect. A simple restart is not
-  sufficient. For further information, also see [nixos-local](../../platform-releases/fc-25.11-production/local.md#nixos-local).
+  sufficient. For further information, also see [nixos-local](../platform/local.md#nixos-local).
 
 ### Role configuration
 

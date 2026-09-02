@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/systemd.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # systemd { #nixos-systemd }
 
@@ -22,7 +22,7 @@ Note that stopped services referenced by `multi-user.target` will be started
 by our management task which runs every 10 minutes or when activating system
 configuration changes manually.
 
-See also [nixos-local](../../platform-releases/fc-25.11-production/local.md#nixos-local) for information about how to activate system
+See also [nixos-local](local.md#nixos-local) for information about how to activate system
 configuration changes.
 
 See the chapter [Service Management](https://nixos.org/manual/nixos/stable/#sec-systemctl)
@@ -37,7 +37,7 @@ The check output also lists all affected units.
 You can define separate checks for important systemd services. These checks
 become `critical` when the service unit is not in state `active`, by using
 the option `flyingcircus.services.sensu-client.systemdUnitChecks`. See
-[nixos-systemd-app-service-example](../../platform-releases/fc-25.11-production/systemd.md#nixos-systemd-app-service-example) below.
+[nixos-systemd-app-service-example](#nixos-systemd-app-service-example) below.
 
 
 ## Custom Units

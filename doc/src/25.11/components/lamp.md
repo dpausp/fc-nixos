@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/lamp.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # LAMP (Apache/php-fpm) { #nixos-lamp }
 
@@ -14,7 +14,7 @@ used to easily run a production-ready PHP application server.
 !!! note
     The Apache configured by this role does not bind / open firewall ports to the
     frontend network automatically. It is not intended to serve applications
-    directly to consumers but should be placed behind a [webgateway](../../platform-releases/fc-25.11-production/webgateway.md#nixos-webgateway).
+    directly to consumers but should be placed behind a [webgateway](webgateway.md#nixos-webgateway).
 
 ## Configuration
 

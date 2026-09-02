@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/upgrades-whats-new.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Upgrades & What's New { #nixos-upgrade }
 
@@ -12,22 +12,22 @@ Here you find information about changes compared to the previous platform
 version, what to consider and where to take action before upgrading.
 
 !!! note
-    Before upgrading a machine, please read the [nixos-upgrade-general](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-general)
-    and [nixos-upgrade-breaking](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-breaking).
+    Before upgrading a machine, please read the [nixos-upgrade-general](#nixos-upgrade-general)
+    and [nixos-upgrade-breaking](#nixos-upgrade-breaking).
     Contact our [support](../../support/index.md#support) for upgrade assistance.
 
 ## Overview { #nixos-upgrade-overview }
 
 - New roles:
-    - [postgresql18](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-postgresql)
+    - [postgresql18](#nixos-upgrade-postgresql)
 - Removed roles:
-    - [mysql57](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-percona)
-    - [percona83](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-percona)
-    - [postgresql13](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-postgresql)
+    - [mysql57](#nixos-upgrade-percona)
+    - [percona83](#nixos-upgrade-percona)
+    - [postgresql13](#nixos-upgrade-postgresql)
 - Roles affected by significant breaking changes:
-    - [webgateway](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-webgateway)
-    - [mailserver](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-mail)
-    - [slurm-controller slurm-node](../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-slurm)
+    - [webgateway](#nixos-upgrade-webgateway)
+    - [mailserver](#nixos-upgrade-mail)
+    - [slurm-controller slurm-node](#nixos-upgrade-slurm)
 - Removed significant packages:
     - `gcc12`
     - `go_1_23`
@@ -77,7 +77,7 @@ Here are some remarks to make sure that an upgrade will run successfully:
 
 As a general advice: reduce platform dependencies of your application
 deployment by using Nix-managed service user environments as described in
-[nixos-user-package-management](../../platform-releases/fc-25.11-production/user_profile.md#nixos-user-package-management) or other forms of dependency isolation
+[nixos-user-package-management](user-profile.md#nixos-user-package-management) or other forms of dependency isolation
 like containers.
 
 ### Upgrade staging first
@@ -173,14 +173,14 @@ There are no breaking changes in the integration of PostgreSQL into the Flying C
 software itself includes some major changes
 listed [in its Release Notes](https://www.postgresql.org/docs/release/18.0/).
 Migrating between major versions of PostgreSQL requires migrating the data directory. See
-[nixos-postgresql-major-upgrade](../../platform-releases/fc-25.11-production/postgresql.md#nixos-postgresql-major-upgrade) for how our platform can help with that.
+[nixos-postgresql-major-upgrade](../components/postgresql.md#nixos-postgresql-major-upgrade) for how our platform can help with that.
 
 `postgresql13` has been removed, as it's end-of-life. Please update to `postgresql14` or newer.
 
 ### Slurm { #nixos-upgrade-slurm }
 
 This release contains a major version upgrade of Slurm from 24.11.x.x (NixOS 25.05) to 25.05.x.x. Nodes of a cluster
-need to be upgraded in a particular order, please consult the [upgrade instructions of the role](../../platform-releases/fc-25.11-production/slurm.md#nixos-slurm-upgrade)
+need to be upgraded in a particular order, please consult the [upgrade instructions of the role](../components/slurm.md#nixos-slurm-upgrade)
 for details.
 
 Regarding new features or changes in Slurm itself,

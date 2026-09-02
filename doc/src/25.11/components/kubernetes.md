@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/kubernetes.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Kubernetes Cluster (k3s) { #nixos-kubernetes }
 
@@ -288,7 +288,7 @@ to generate backends that are dynamically populated with the pod IPs
 automatically when you add/remove pods. By default, up to 10 pods are used by
 HAProxy. You can change the `maxExpectedPods` setting described below.
 
-See [nixos-webgateway](../../platform-releases/fc-25.11-production/webgateway.md#nixos-webgateway) for more details about general HAProxy and nginx
+See [nixos-webgateway](webgateway.md#nixos-webgateway) for more details about general HAProxy and nginx
 configuration.
 
 

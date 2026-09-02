@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/mongodb.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # MongoDB { #nixos-mongodb }
 
@@ -14,7 +14,7 @@ search:
     older machines to 25.05.
 
     New projects should not use MongoDB. As a replacement, we offer a
-    [FerretDB role](../../platform-releases/fc-25.11-production/ferretdb.md#nixos-ferretdb) which is currently in beta.
+    [FerretDB role](ferretdb.md#nixos-ferretdb) which is currently in beta.
     [FerretDB](https://www.ferretdb.com) builds on PostgreSQL and is compatible
     to MongoDB for many use cases.
 

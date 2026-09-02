@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/redis.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Redis { #nixos-redis }
 
@@ -52,7 +52,7 @@ The following NixOS module adds some modules to be loaded by Redis:
 }
 ```
 
-See [nixos-custom-modules](../../platform-releases/fc-25.11-production/local.md#nixos-custom-modules) for general information about writing custom NixOS
+See [nixos-custom-modules](../platform/local.md#nixos-custom-modules) for general information about writing custom NixOS
 modules in `/etc/local/nixos`.
 
 There are also some options under `flyingcircus.services.redis`, namely
@@ -92,7 +92,7 @@ system.
 ```
 
 For further information on how to activate changes on our NixOS-environment,
-please consult [nixos-local](../../platform-releases/fc-25.11-production/local.md#nixos-local).
+please consult [nixos-local](../platform/local.md#nixos-local).
 
 ## Password
 

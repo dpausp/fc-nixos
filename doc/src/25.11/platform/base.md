@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/base.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Base environment { #nixos-base }
 
@@ -15,7 +15,7 @@ executable files to the global PATH and some can be used as a library.
 Depending on globally-installed packages should generally be avoided as this
 may cause breakage of your applications, especially on NixOS upgrades. It's
 better to use custom user environments to install application dependencies,
-as described in [nixos-user-package-management](../../platform-releases/fc-25.11-production/user_profile.md#nixos-user-package-management) or other methods to
+as described in [nixos-user-package-management](user-profile.md#nixos-user-package-management) or other methods to
 isolate application dependencies from the system.
 
 Also note that these packages don't provide running services/daemons, like

@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/memcached.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
 
 # Memcached { #nixos-memcached }
 
@@ -22,7 +22,7 @@ changed options into a JSON file and save it
 to `/etc/local/memcached/memcached.json`.
 
 For further information on how to activate changes on our NixOS-environment,
-please consult section [nixos-local](../../platform-releases/fc-25.11-production/local.md#nixos-local).
+please consult section [nixos-local](../platform/local.md#nixos-local).
 
 Supported options are:
 
