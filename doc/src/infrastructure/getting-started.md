@@ -40,7 +40,7 @@ automatically and will get in touch with you.
     The user account is for maintenance purposes only. Do not consider to
     run your application in the user account context, since many fundamental
     features are not available. For information in how to deploy you application
-    check the [application-deployment-intro](index.md#application-deployment-intro) section in this tutorial.
+    check the [application-deployment-intro](#application-deployment-intro) section in this tutorial.
 
 ## SSH Login
 
@@ -71,7 +71,7 @@ $ scp my-file myuser@myapp00.gocept.net:
 
 !!! warning
     If you have problems connecting to the VM, check our section on
-    [connecting](../networking/connecting.md#connecting).
+    [connecting](networking/connecting.md#connecting).
 
 ## Application Deployment { #application-deployment-intro }
 
@@ -138,7 +138,7 @@ public IPv4 addresses on ethsrv.
     of the server network only.
 
 Further information about our networking concept can be found in the
-[networking](../networking/index.md#networking) section.
+[networking](networking/index.md#networking) section.
 
 ### Disks
 
