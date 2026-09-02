@@ -35,7 +35,6 @@ import sys
 from pathlib import Path
 
 import pytest
-
 from tools import checkout_versioned_docs as cot
 
 DOC = Path(__file__).resolve().parents[1]
@@ -247,7 +246,7 @@ def test_fingerprint_change_forces_replacement(
     project: tuple[Path, Path, Path],
 ) -> None:
     """A different tool_sha256 in the manifest re-places the tree."""
-    _, doc_src, versions = project
+    _, doc_src, _versions = project
     assert run(project) == 0
     manifest_path = doc_src / cot.MANIFEST_NAME
     manifest = json.loads(manifest_path.read_text())
@@ -263,7 +262,7 @@ def test_missing_bookmark_fails_loudly(
     project: tuple[Path, Path, Path], capsys: pytest.CaptureFixture[str]
 ) -> None:
     """An unresolvable rev exits 1, names the rev, hints to pull."""
-    repo, doc_src, versions = project
+    _repo, doc_src, versions = project
     versions.write_text(
         TOML + '\n[[sunsetting]]\nver = "25.05"\nrev = "fc-25.05-production"\n'
     )

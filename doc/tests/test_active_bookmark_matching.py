@@ -16,12 +16,11 @@ import subprocess
 from pathlib import Path
 
 import pytest
-
 from tools import checkout_versioned_docs as cot
 from tools import gen_platform_versions as gpv
 
 TOML = """\
-[current]
+[stable]
 ver = "26.05"
 rev = "fc-26.05-production"
 
@@ -94,9 +93,9 @@ def load(
 
 
 def test_match_active_returns_the_bookmarked_entry(repo: Path) -> None:
-    """Active [current] bookmark matches the current entry."""
+    """Active [stable] bookmark matches the stable entry."""
     matched = gpv.match_active(load(repo), repo)
-    assert (matched.ver, matched.status) == ("26.05", "current")
+    assert (matched.ver, matched.status) == ("26.05", "stable")
 
 
 def test_match_active_follows_the_active_bookmark_not_the_category(

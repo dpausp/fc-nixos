@@ -14,15 +14,24 @@ Two inputs, both on disk and strictly local:
   (tree-relative path sans ``.md``, trailing ``index`` folded away:
   ``getting-started/index.md`` -> ``getting-started``). The scan is
   content-agnostic: WHAT a page contains never matters, only WHETHER
-  the file exists in a tree. Snapshot dirs never leak into the local
+  the file exists in a tree. Snapshot dirs never leak into the master
   inventory: top-level ``src/<NN.NN>/`` dirs are skipped when scanning
-  the stable version.
+  the master version.
 
-A page-id found in at least TWO trees is *versioned*: every version
-carrying it gets a ``pages`` entry mapping the page-id to its URL
-prefix -- the data same-page switching is built from. A page-id that
-exists in only one tree is a common page and gets no switcher entry at
-all.
+The payload is MASTER-CENTRIC and inverted: keys are page-ids, values
+the snapshot versions carrying them::
+
+    {"master": "<ver>",
+     "versions": {"<ver>": {"label", "status", "index"}},  # keys sorted
+     "pages": {"<page-id>": ["<ver>", ...]}}               # keys sorted
+
+``pages`` has keys only for MASTER pages carried by at least one
+snapshot; each carrier list names the snapshots WITHOUT the master, in
+canonical TOML entry order. A page-id existing in only one tree is a
+common page and gets no switcher entry at all; a snapshot page without
+a master equivalent is excluded and warned about
+(``snapshot-extra-pages``) -- the switcher never offers a page the
+master manual does not have.
 
 The output file is COMMITTED (generated, never hand-edited). Regenerate
 via ``make gen-platform-versions`` after changing the TOML or after
@@ -36,12 +45,12 @@ import json
 import re
 import subprocess
 import sys
-import tomllib
 from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 
 import structlog
+import tomllib
 
 log = structlog.get_logger()
 
@@ -94,7 +103,11 @@ def _entry(section: str, raw: object, path: Path) -> VersionEntry:
     """Validate one TOML section into a :class:`VersionEntry`."""
     if not isinstance(raw, dict):
         msg = f"[{section}] must be a table, got {type(raw).__name__}"
-        raise ValueError(msg)
+        # ValueError, not TypeError: every schema violation of the
+        # TOML document is one documented, caught-as-one family
+        # (main() maps it to exit 2), mirroring tomllib's
+        # TOMLDecodeError and pydantic's ValidationError.
+        raise ValueError(msg)  # noqa: TRY004
     ver = raw.get("ver")
     rev = raw.get("rev")
     if not isinstance(ver, str) or not VERSION_RE.fullmatch(ver):
@@ -230,30 +243,56 @@ def scan_page_ids(tree: Path, *, exclude_snapshots: bool = False) -> set[str]:
 def build_payload(
     versions: VersionSet, matched: VersionEntry, src_root: Path
 ) -> dict:
-    """Build the switcher payload with ``matched`` as the local manual.
+    """Build the master-centric switcher payload.
 
     ``matched`` (the entry whose rev is the ACTIVE bookmark, see
-    :func:`match_active`) builds at ``/``: the local ``src/`` tree IS
-    its inventory. Every OTHER declared entry -- including a
-    non-matched ``[stable]`` -- is a snapshot at ``/<ver>/`` whose
-    inventory is scanned from ``src/<ver>/``. Missing snapshots of
-    declared versions and orphan snapshot dirs of undeclared versions
-    are warned about, never fatal -- the payload is still complete
-    enough to build with (empty ``pages``), and ``make
-    checkout-versioned-docs`` is the fix for both.
+    :func:`match_active`) is the MASTER manual: it builds at ``/``
+    and anchors the payload -- the local ``src/`` tree IS its
+    inventory. Every OTHER declared entry -- including a non-matched
+    ``[stable]`` -- is a snapshot at ``/<ver>/`` whose inventory is
+    scanned from ``src/<ver>/``.
+
+    Shape (all keys deterministically sorted, see the module
+    docstring)::
+
+        {"master": matched.ver,
+         "versions": {ver: {"label", "status", "index"}},
+         "pages": {page_id: [carrier vers without the master]}}
+
+    Missing snapshots of declared versions and orphan snapshot dirs
+    of undeclared versions are warned about, never fatal -- the
+    payload is still complete enough to build with (empty carrier
+    lists), and ``make checkout-versioned-docs`` is the fix for both.
+    Snapshot pages WITHOUT a master equivalent trigger the
+    ``snapshot-extra-pages`` warning and appear nowhere in the
+    payload: switching is only ever offered for pages the master
+    manual verifiably carries.
     """
     entries = versions.entries()
+    carrier_order = [entry.ver for entry in entries]
 
-    inventories: dict[str, set[str] | None] = {}
+    master_inventory = scan_page_ids(src_root, exclude_snapshots=True)
+    inventories: dict[str, set[str] | None] = {matched.ver: master_inventory}
     for entry in entries:
         if entry.ver == matched.ver:
-            inventories[entry.ver] = scan_page_ids(
-                src_root, exclude_snapshots=True
-            )
             continue
         snapshot = src_root / entry.ver
         if snapshot.is_dir():
-            inventories[entry.ver] = scan_page_ids(snapshot)
+            inventory = scan_page_ids(snapshot)
+            inventories[entry.ver] = inventory
+            extras = sorted(inventory - master_inventory)
+            if extras:
+                log.warning(
+                    "snapshot-extra-pages",
+                    ver=entry.ver,
+                    pages=extras,
+                    count=len(extras),
+                    hint=(
+                        "page(s) have no master equivalent -- excluded "
+                        "from the switcher payload; sync or remove them "
+                        "in the snapshot source"
+                    ),
+                )
         else:
             inventories[entry.ver] = None
             log.warning(
@@ -278,29 +317,35 @@ def build_payload(
                     hint="not declared in platform-versions.toml; checkout-versioned-docs prunes it",
                 )
 
-    known = set().union(*(inv for inv in inventories.values() if inv))
-    versioned = {
-        page_id
-        for page_id in known
-        if sum(1 for inv in inventories.values() if inv and page_id in inv) >= 2
-    }
+    # Keys only for master pages with >= 1 snapshot carrier; carrier
+    # lists in canonical entry order (stable, prereleases,
+    # sunsettings) WITHOUT the master. Insertion in sorted page-id
+    # order keeps the dict key order deterministic.
+    pages: dict[str, list[str]] = {}
+    for page_id in sorted(master_inventory):
+        carriers: list[str] = []
+        for ver in carrier_order:
+            if ver == matched.ver:
+                continue
+            inventory = inventories[ver]
+            if inventory and page_id in inventory:
+                carriers.append(ver)
+        if carriers:
+            pages[page_id] = carriers
 
-    payload_versions = []
-    for entry in entries:
-        inventory = inventories[entry.ver] or set()
-        index = "/" if entry.ver == matched.ver else f"/{entry.ver}/"
-        payload_versions.append(
-            {
-                "ver": entry.ver,
-                "label": entry.label,
-                "status": entry.status,
-                "index": index,
-                "pages": {
-                    page_id: index for page_id in sorted(inventory & versioned)
-                },
-            }
-        )
-    return {"stable": matched.ver, "versions": payload_versions}
+    payload_versions = {
+        entry.ver: {
+            "label": entry.label,
+            "status": entry.status,
+            "index": "/" if entry.ver == matched.ver else f"/{entry.ver}/",
+        }
+        for entry in sorted(entries, key=lambda entry: entry.ver)
+    }
+    return {
+        "master": matched.ver,
+        "versions": payload_versions,
+        "pages": pages,
+    }
 
 
 GENERATED_HEADER = (
@@ -392,23 +437,23 @@ def main(argv: Sequence[str] | None = None) -> int:
     payload = build_payload(versions, matched, args.src)
     rendered = render_js(payload)
     if args.out.exists() and args.out.read_text() == rendered:
-        versioned = len({p for v in payload["versions"] for p in v["pages"]})
         log.info(
             "gen-platform-versions-unchanged",
             out=str(args.out),
+            master=payload["master"],
             versions=len(payload["versions"]),
-            versioned_pages=versioned,
+            versioned_pages=len(payload["pages"]),
         )
         return 0
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(rendered)
-    versioned = len({p for v in payload["versions"] for p in v["pages"]})
     log.info(
         "gen-platform-versions-done",
         out=str(args.out),
+        master=payload["master"],
         versions=len(payload["versions"]),
-        versioned_pages=versioned,
+        versioned_pages=len(payload["pages"]),
     )
     return 0
 

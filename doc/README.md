@@ -61,10 +61,25 @@ fails the build loudly; there is no fallback.
 
 The `src/_static/platform-versions.js` payload is **generated** by
 `make gen-platform-versions` -- never edit it by hand. Releases and sunsets
-are configured exclusively in `platform-versions.toml`. Which page carries a
-version switcher in which versions is derived from the page inventory: a
-page present in at least two trees is versioned and gets a switcher entry; a
-page present in only one tree is a common page without its own switcher.
+are configured exclusively in `platform-versions.toml`. The payload is
+master-centric and inverted:
+
+```json
+{
+  "master": "26.05",
+  "versions": {"<ver>": {"label": "...", "status": "...", "index": "/"}},
+  "pages": {"<page-id>": ["<ver>", "..."]}
+}
+```
+
+`master` is the ACTIVE bookmark's version (the manual built at `/`);
+`pages` has keys only for master pages carried by at least one snapshot,
+each value listing the carrying snapshot versions (without the master) in
+canonical TOML order. A page present only in the master tree is a common
+page without its own switcher; a snapshot page without a master equivalent
+is excluded from the payload and triggers the generator's
+`snapshot-extra-pages` warning. The version switcher therefore only ever
+offers versions that verifiably carry the current page.
 
 ## Cross-Version Documents
 

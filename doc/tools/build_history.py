@@ -81,7 +81,9 @@ OVERLAY_ASSETS = ("overlay.js", "overlay.css", "history-urls.js")
 # hg log template for revset resolution: unit-separator delimited fields,
 # record-separator delimited records (subjects are single-line via
 # {desc|firstline}, so no field can contain a separator).
-_HG_TEMPLATE = "{rev}\x1f{node}\x1f{date|shortdate}\x1f{branch}\x1f{desc|firstline}\x1e"
+_HG_TEMPLATE = (
+    "{rev}\x1f{node}\x1f{date|shortdate}\x1f{branch}\x1f{desc|firstline}\x1e"
+)
 
 # Default revset: the Zensical era (rev 1952 switched the Makefile from
 # Sphinx to Zensical). Older revisions build via `make history REVS=<revset>`
@@ -164,8 +166,12 @@ def inject_overlay(page_html: str) -> str:
         else _OVERLAY_SCRIPT
     )
     at = page_html.rfind("</body>")
-    injected = page_html + tags if at == -1 else page_html[:at] + tags + page_html[at:]
-    log.debug("overlay-injected", added_link=need_link, added_script=need_script)
+    injected = (
+        page_html + tags if at == -1 else page_html[:at] + tags + page_html[at:]
+    )
+    log.debug(
+        "overlay-injected", added_link=need_link, added_script=need_script
+    )
     return injected
 
 
@@ -221,7 +227,9 @@ def write_manifest(history_root: Path, manifest: dict) -> Path:
     tmp.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     os.replace(tmp, path)
     log.debug(
-        "history-manifest-written", path=str(path), revisions=len(manifest["revisions"])
+        "history-manifest-written",
+        path=str(path),
+        revisions=len(manifest["revisions"]),
     )
     return path
 
@@ -306,7 +314,9 @@ def build_history(
     """
     history_root.mkdir(parents=True, exist_ok=True)
     ordered = sorted(revisions, key=lambda r: int(r.rev))
-    previous = {e["rev"]: e for e in load_manifest(history_root).get("revisions", [])}
+    previous = {
+        e["rev"]: e for e in load_manifest(history_root).get("revisions", [])
+    }
     entries: dict[str, dict] = {}
     pending: list[Revision] = []
 
@@ -325,7 +335,9 @@ def build_history(
             pending.append(revision)
 
     def persist() -> dict:
-        manifest = {"revisions": [entries[r.rev] for r in ordered if r.rev in entries]}
+        manifest = {
+            "revisions": [entries[r.rev] for r in ordered if r.rev in entries]
+        }
         write_manifest(history_root, manifest)
         return manifest
 
@@ -439,21 +451,28 @@ def _run_hg(args: Sequence[str], cwd: Path) -> str:
 
 
 def resolve_revisions(
-    repo_root: Path, revset: str, *, run_fn: Callable[[list[str], Path], str] = _run_hg
+    repo_root: Path,
+    revset: str,
+    *,
+    run_fn: Callable[[list[str], Path], str] = _run_hg,
 ) -> list[Revision]:
     """Resolve *revset* via ``hg log`` into Revision objects, ascending by rev.
 
     ``run_fn(["log", ...], cwd)`` is injectable for testing; the production
     runner shells out to hg in *repo_root*.
     """
-    out = run_fn(["log", "--rev", revset, "--template", _HG_TEMPLATE], repo_root)
+    out = run_fn(
+        ["log", "--rev", revset, "--template", _HG_TEMPLATE], repo_root
+    )
     revisions: list[Revision] = []
     for record in out.split("\x1e"):
         if not record.strip():
             continue
         rev, node, date, branch, subject = record.strip("\n").split("\x1f")
         revisions.append(
-            Revision(rev=rev, hash=node, date=date, branch=branch, subject=subject)
+            Revision(
+                rev=rev, hash=node, date=date, branch=branch, subject=subject
+            )
         )
     revisions.sort(key=lambda r: int(r.rev))
     log.info(
@@ -499,7 +518,8 @@ class RevisionBuilder:
         repo_root: Path,
         *,
         run_fn: Callable[
-            [list[str], Path, dict[str, str] | None], subprocess.CompletedProcess
+            [list[str], Path, dict[str, str] | None],
+            subprocess.CompletedProcess,
         ]
         | None = None,
     ) -> None:
@@ -512,7 +532,12 @@ class RevisionBuilder:
         cmd: list[str], cwd: Path, env: dict[str, str] | None
     ) -> subprocess.CompletedProcess:
         proc = subprocess.run(
-            cmd, cwd=str(cwd), capture_output=True, text=True, env=env, check=False
+            cmd,
+            cwd=str(cwd),
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
         )
         log.info(
             "history-subprocess",
@@ -552,7 +577,9 @@ class RevisionBuilder:
                 # Stale staging of an interrupted run -- the .tmp dir is
                 # never served, safe (and required) to start clean.
                 log.info(
-                    "history-staging-cleared", rev=revision.rev, staging=str(staging)
+                    "history-staging-cleared",
+                    rev=revision.rev,
+                    staging=str(staging),
                 )
                 shutil.rmtree(staging)
             staging.mkdir(parents=True, exist_ok=True)
@@ -574,7 +601,10 @@ class RevisionBuilder:
                 error=str(exc)[:500],
             )
             return BuildResult(
-                status="failed", content=content, duration=duration, log_excerpt=excerpt
+                status="failed",
+                content=content,
+                duration=duration,
+                log_excerpt=excerpt,
             )
         duration = round(time.monotonic() - started, 1)
         log.info(
@@ -602,7 +632,9 @@ class RevisionBuilder:
                 f"hg archive failed for rev {revision.rev} (exit {proc.returncode})"
             )
 
-    def _fetch(self, revision: Revision, work: Path, transcript: list[str]) -> str:
+    def _fetch(
+        self, revision: Revision, work: Path, transcript: list[str]
+    ) -> str:
         """Historic ``make fetch``; documented fallback on failure.
 
         Returns the content flag: "historic" (fetched against the revision's
@@ -632,7 +664,9 @@ class RevisionBuilder:
         self._copy_current_platform_trees(revision, work)
         return "current"
 
-    def _copy_current_platform_trees(self, revision: Revision, work: Path) -> None:
+    def _copy_current_platform_trees(
+        self, revision: Revision, work: Path
+    ) -> None:
         """Mirror today's fetched platform trees into the archived *work* tree."""
         for rel in _FALLBACK_TREES:
             src = self.repo_root / "src" / rel
@@ -648,15 +682,23 @@ class RevisionBuilder:
             elif dest.exists():
                 dest.unlink()
             (dest.parent).mkdir(parents=True, exist_ok=True)
-            shutil.copytree(src, dest) if src.is_dir() else shutil.copyfile(src, dest)
+            shutil.copytree(src, dest) if src.is_dir() else shutil.copyfile(
+                src, dest
+            )
 
     def _build_site(
-        self, revision: Revision, work: Path, content: str, transcript: list[str]
+        self,
+        revision: Revision,
+        work: Path,
+        content: str,
+        transcript: list[str],
     ) -> None:
         """Build the English manual with the revision's own Makefile."""
         makefile = work / "Makefile"
         if not makefile.is_file():
-            raise _StepFailure(f"rev {revision.rev}: no Makefile in the archived tree")
+            raise _StepFailure(
+                f"rev {revision.rev}: no Makefile in the archived tree"
+            )
         target = (
             "html-en"
             if _HTML_EN_TARGET_RE.search(makefile.read_text(encoding="utf-8"))
@@ -819,7 +861,9 @@ def copy_overlay_assets(history_root: Path) -> list[Path]:
         shutil.copyfile(src, dest)
         copied.append(dest)
     log.info(
-        "history-assets-copied", assets=[str(p) for p in copied], dest=str(history_root)
+        "history-assets-copied",
+        assets=[str(p) for p in copied],
+        dest=str(history_root),
     )
     return copied
 
@@ -872,12 +916,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                 opts[arg] = next(it)
             except StopIteration:
                 log.error(
-                    "history-cli-usage", error=f"{arg} requires a value", usage=_USAGE
+                    "history-cli-usage",
+                    error=f"{arg} requires a value",
+                    usage=_USAGE,
                 )
                 return 2
         else:
             log.error(
-                "history-cli-usage", error=f"unknown argument {arg!r}", usage=_USAGE
+                "history-cli-usage",
+                error=f"unknown argument {arg!r}",
+                usage=_USAGE,
             )
             return 2
     try:

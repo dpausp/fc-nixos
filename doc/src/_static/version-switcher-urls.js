@@ -4,43 +4,52 @@
  * version-switcher.js (see zensical.toml extra_javascript) which
  * consumes this contract:
  *
- *   locate(path, data) -> {entry, pageId} describing the page the
- *     reader is on, or null when fewer than TWO versions carry the
- *     page-id -- common pages get NO flyout (user decision
- *     2026-08-18), the navigation tree stays undisplaced.
+ *   locate(path, data) -> {ver, entry, pageId, others} describing
+ *     the page the reader is on, or null when the page-id is NOT a
+ *     master page carried by at least one snapshot -- common pages
+ *     get NO flyout (user decision 2026-08-18), the navigation tree
+ *     stays undisplaced. ``others`` lists the carrying snapshot
+ *     versions WITHOUT the master, in payload order.
  *
- *   targetHref(entry, here) -> the SAME page in the target version as
- *     a zensical .html URL (<prefix><page-id>.html, one step, no
- *     version-index detour) when the version's inventory carries the
- *     page-id; otherwise the version index with ?missing=<page-id>,
- *     where version-switcher-fallback.js explains what happened.
+ *   targetHref(entry, here) -> the SAME page in the target version
+ *     as a zensical .html URL (<entry.index><page-id>.html, one
+ *     step, no version-index detour). Flyout rows only ever point
+ *     at versions that carry the page -- the master by payload
+ *     construction, snapshots per data.pages -- so this is pure URL
+ *     arithmetic with no ?missing= case.
  *
- * URL spaces: "/" is the stable version's space (the local tree),
+ * URL spaces: "/" is the MASTER version's space (the local tree),
  * "/<ver>/" a checked-out snapshot's (make checkout-versioned-docs).
- * Page-ids are URL-shaped and match the generated inventories in
- * window.PLATFORM_VERSIONS (make gen-platform-versions): tree-relative
- * paths sans .md with a trailing "index" component folded away -- the
- * root page has page-id "" and every href is prefix or
- * prefix + pageId + ".html". Directory URLs are accepted on input for
- * backwards compatibility.
+ * Page-ids are URL-shaped and match the generated data.pages keys in
+ * window.PLATFORM_VERSIONS (make gen-platform-versions):
+ * tree-relative paths sans .md with a trailing "index" component
+ * folded away -- the root page has page-id "" and every href is
+ * entry.index or entry.index + pageId + ".html". Directory URLs are
+ * accepted on input for backwards compatibility.
+ *
+ * Data shape (generated, master-centric, keys deterministically
+ * sorted):
+ *
+ *   window.PLATFORM_VERSIONS = {
+ *     master: "<master ver>",
+ *     versions: {"<ver>": {label, status, index}},
+ *     pages: {"<page-id>": ["<ver>", ...]}  // master pages only
+ *   };
  */
 window.VersionSwitcherUrls = {
   PRIMARY_MOUNT_SELECTOR: ".md-sidebar--primary .md-sidebar__inner",
   SECONDARY_MOUNT_SELECTOR: ".md-sidebar--secondary .md-sidebar__inner",
 
   // The version entry whose URL space *path* lives in: the first path
-  // segment matching a version's ver, else the entry serving "/" (the
-  // stable version).
+  // segment naming a key of the versions map, else the MASTER entry
+  // (the version serving "/"). Prototype-safe: the segment comes
+  // from a URL.
   entryFor: function (path, data) {
     var seg = path.replace(/^\/+/, "").split("/")[0];
-    var v;
-    for (v = 0; v < data.versions.length; v += 1) {
-      if (seg && data.versions[v].ver === seg) return data.versions[v];
+    if (seg && Object.prototype.hasOwnProperty.call(data.versions, seg)) {
+      return data.versions[seg];
     }
-    for (v = 0; v < data.versions.length; v += 1) {
-      if (data.versions[v].index === "/") return data.versions[v];
-    }
-    return null;
+    return data.versions[data.master] || null;
   },
 
   // path -> page-id relative to its version space ("" = manual root).
@@ -63,33 +72,45 @@ window.VersionSwitcherUrls = {
     return pageId;
   },
 
-  // How many versions' inventories carry *pageId*.
+  // data.pages carriers for *pageId* -- the snapshot versions carrying
+  // it, WITHOUT the master -- or [] when the master tree has no such
+  // page (or no snapshot carries it). Prototype-safe: page-ids come
+  // from URLs.
   carriersOf: function (pageId, data) {
-    var carriers = 0;
-    for (var v = 0; v < data.versions.length; v += 1) {
-      var pages = data.versions[v].pages;
-      if (pages && Object.prototype.hasOwnProperty.call(pages, pageId)) {
-        carriers += 1;
-      }
+    if (!Object.prototype.hasOwnProperty.call(data.pages, pageId)) {
+      return [];
     }
-    return carriers;
+    return data.pages[pageId];
   },
 
   locate: function (path, data) {
     var entry = this.entryFor(path, data);
     if (!entry) return null;
     var pageId = this.pageIdFor(path, entry);
-    // Versioned pages only: a page-id found in fewer than two trees is
-    // a common page -- nothing to switch here.
-    if (this.carriersOf(pageId, data) < 2) return null;
-    return { entry: entry, pageId: pageId };
+    // Master pages with >= 1 snapshot carrier only: every data.pages
+    // key is a master page by generator construction, so an empty
+    // carrier list means a common page -- nothing to switch here.
+    var others = this.carriersOf(pageId, data);
+    if (others.length === 0) return null;
+    // The reader's version key: the first path segment when it names
+    // a version, else the master -- same rule entryFor() applies.
+    var seg = path.replace(/^\/+/, "").split("/")[0];
+    var ver =
+      seg && Object.prototype.hasOwnProperty.call(data.versions, seg)
+        ? seg
+        : data.master;
+    return { ver: ver, entry: entry, pageId: pageId, others: others };
   },
 
+  // The same page in *entry* as a zensical .html URL:
+  // <entry.index><page-id>.html (same page, one step; the root page
+  // is just the version index). Rows are built only from versions
+  // that carry the page, so there is no missing-page case here --
+  // version-switcher-fallback.js still explains ?missing= URLs from
+  // stale links of earlier payload shapes.
   targetHref: function (entry, here) {
-    var prefix = entry.pages ? entry.pages[here.pageId] : undefined;
-    if (prefix !== undefined) {
-      return here.pageId === "" ? entry.index : prefix + here.pageId + ".html";
-    }
-    return entry.index + "?missing=" + here.pageId;
+    return here.pageId === ""
+      ? entry.index
+      : entry.index + here.pageId + ".html";
   },
 };

@@ -9,9 +9,10 @@
  * in (from window.PLATFORM_VERSIONS, see _static/platform-versions.js),
  * and links straight to the page in the first version that has it.
  *
- * Every link built here is a zensical .html URL (<prefix><page-id>.html),
- * like everywhere in the switcher asset family (directory URLs are
- * accepted on input for backwards compatibility).
+ * Every link built here is a zensical .html URL
+ * (<entry.index><page-id>.html), like everywhere in the switcher
+ * asset family (directory URLs are accepted on input for backwards
+ * compatibility).
  *
  * Inserted at the top of the page content (.md-content__inner), right
  * AFTER any sunsetting banner so the banner stays the first content
@@ -28,7 +29,9 @@
 
   // The version entry whose index page this is (its index URL ends the path).
   // Handles both directory URLs ("/26.05/") and html URLs
-  // ("/26.05/index.html", "/index.html").
+  // ("/26.05/index.html", "/index.html"). Iterates the versions map --
+  // Object.keys order is the payload's deterministic, alphabetically
+  // sorted key order.
   function locateVersion(path, data) {
     var normalized = path;
     if (normalized.endsWith("/index.html")) {
@@ -38,8 +41,9 @@
     } else if (normalized === "/index.html") {
       normalized = "/";
     }
-    for (var v = 0; v < data.versions.length; v += 1) {
-      var entry = data.versions[v];
+    var vers = Object.keys(data.versions);
+    for (var v = 0; v < vers.length; v += 1) {
+      var entry = data.versions[vers[v]];
       if (normalized.slice(-entry.index.length) === entry.index) return entry;
     }
     return null;
@@ -50,17 +54,21 @@
     return "../".repeat(indexUrl.split("/").length - 1);
   }
 
-  // The first version (stable first, per the data order) that has the page.
+  // The first version that has the page: the MASTER first, then the
+  // data.pages carriers. data.pages keys are master pages, so the
+  // master carries every one of them by generator construction;
+  // page-ids outside data.pages are carried nowhere verifiably and
+  // get no link (the notice falls back to its generic hint).
   function findElsewhere(pageId, data) {
-    for (var v = 0; v < data.versions.length; v += 1) {
-      var entry = data.versions[v];
-      var prefix = entry.pages ? entry.pages[pageId] : undefined;
-      if (prefix !== undefined) {
-        var url = pageId === "" ? entry.index : prefix + pageId + ".html";
-        return { entry: entry, url: url };
-      }
+    if (!Object.prototype.hasOwnProperty.call(data.pages, pageId)) {
+      return null;
     }
-    return null;
+    var order = [data.master].concat(data.pages[pageId] || []);
+    var entry = data.versions[order[0]];
+    return {
+      entry: entry,
+      url: pageId === "" ? entry.index : entry.index + pageId + ".html",
+    };
   }
 
   function buildNotice(missing, here, elsewhere, prefix) {
@@ -139,7 +147,7 @@
     if (!missing) return;
 
     var data = window.PLATFORM_VERSIONS;
-    if (!data || !Array.isArray(data.versions)) {
+    if (!data || !data.master || !data.versions || !data.pages) {
       console.warn(
         "version-switcher-fallback: window.PLATFORM_VERSIONS is missing -- " +
           "run `make gen-platform-versions` to regenerate _static/platform-versions.js"

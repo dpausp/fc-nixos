@@ -6,8 +6,9 @@
  * _static/version-switcher-urls.js:
  *
  *   window.PLATFORM_VERSIONS = {
- *     stable: "<stable ver>",
- *     versions: [{ver, status, label, index, pages: {<page-id>: <prefix>}}]
+ *     master: "<master ver>",
+ *     versions: {"<ver>": {label, status, index}},   // keys sorted
+ *     pages: {"<page-id>": ["<ver>", ...]}           // master pages
  *   };
  *   window.VersionSwitcherUrls = {locate, targetHref, ...};
  *
@@ -57,8 +58,10 @@
     var data = window.PLATFORM_VERSIONS;
     if (
       !data ||
-      !Array.isArray(data.versions) ||
-      data.versions.length === 0
+      !data.master ||
+      !data.versions ||
+      !data.versions[data.master] ||
+      !data.pages
     ) {
       console.warn(
         "version-switcher: window.PLATFORM_VERSIONS is missing or empty -- " +
@@ -91,8 +94,16 @@
     );
 
     var list = document.createElement("ul");
-    for (var v = 0; v < data.versions.length; v += 1) {
-      var entry = data.versions[v];
+    // Rows: the MASTER entry first, then the carrier versions
+    // (here.others, payload order) -- every row verifiably carries
+    // the current page, so targetHref needs no missing-page case.
+    var rows = [data.versions[data.master]].concat(
+      here.others.map(function (ver) {
+        return data.versions[ver];
+      })
+    );
+    for (var v = 0; v < rows.length; v += 1) {
+      var entry = rows[v];
       var item = document.createElement("li");
       var link = document.createElement("a");
       link.href = urls.targetHref(entry, here);
@@ -142,7 +153,7 @@
     // Versioned pages only: nothing to switch elsewhere.
     if (!here) return;
     mount(buildFlyout(data, here, urls), urls);
-    var suffix = " — Platform " + here.entry.ver;
+    var suffix = " — Platform " + here.ver;
     if (!document.title.endsWith(suffix)) {
       document.title = document.title + suffix;
     }

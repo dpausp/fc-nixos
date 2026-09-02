@@ -14,7 +14,6 @@ from pathlib import Path
 
 import pytest
 from structlog.testing import capture_logs
-
 from tools.checkout_versioned_docs import (
     MANIFEST_NAME,
     STATUS_CLAUSE,
@@ -94,7 +93,7 @@ def test_banner_links_counterpart() -> None:
         '!!! warning "Documentation for platform version 25.11"\n'
         "    Platform version 25.11 is in sunsetting -- this page is kept"
         " for reference.\n"
-        "    The current documentation for this topic is the"
+        "    The stable documentation for this topic is the"
         " [26.05 version](../../components/x).\n\n"
     )
 
@@ -107,7 +106,7 @@ def test_banner_links_manual_without_counterpart() -> None:
         '!!! warning "Documentation for platform version 25.11"\n'
         "    Platform version 25.11 is in sunsetting -- this page is kept"
         " for reference.\n"
-        "    The current documentation for this topic is the"
+        "    The stable documentation for this topic is the"
         " [26.05 manual](../index).\n\n"
     )
 
@@ -141,9 +140,9 @@ def test_process_snapshot_annotates_sunsetting(tmp_path: Path) -> None:
     )
 
 
-def test_process_snapshot_old_current_wording(tmp_path: Path) -> None:
-    """A non-matched current snapshot: same treatment, but the wording
-    never says 'sunsetting' -- its public status is current."""
+def test_process_snapshot_old_stable_wording(tmp_path: Path) -> None:
+    """A non-matched stable snapshot: same treatment, but the wording
+    never says 'sunsetting' -- its public status is stable."""
     tree = tmp_path / "26.05"
     page = tree / "y.md"
     tree.mkdir(parents=True)
@@ -151,7 +150,7 @@ def test_process_snapshot_old_current_wording(tmp_path: Path) -> None:
     src = tmp_path / "src"
     src.mkdir()
 
-    count = process_snapshot(tree, "26.05", "current", "26.11", src)
+    count = process_snapshot(tree, "26.05", "stable", "26.11", src)
 
     text = page.read_text()
     assert "is an older version" in text
@@ -161,10 +160,10 @@ def test_process_snapshot_old_current_wording(tmp_path: Path) -> None:
 
 
 def test_status_clause_covers_snapshot_statuses() -> None:
-    """Every non-prerelease status has wording; none of the current
+    """Every non-prerelease status has wording; none of the stable
     wording may say 'sunsetting'."""
-    assert set(STATUS_CLAUSE) == {"current", "sunsetting"}
-    assert "sunsetting" not in STATUS_CLAUSE["current"]
+    assert set(STATUS_CLAUSE) == {"stable", "sunsetting"}
+    assert "sunsetting" not in STATUS_CLAUSE["stable"]
 
 
 def hg(repo: Path, *args: str) -> str:
@@ -214,7 +213,7 @@ def wired(tmp_path: Path) -> tuple[Path, Path, Path]:
     src.mkdir(parents=True)
     versions = tmp_path / "doc" / "platform-versions.toml"
     versions.write_text(
-        '[current]\nver = "26.05"\nrev = "fc-26.05-production"\n'
+        '[stable]\nver = "26.05"\nrev = "fc-26.05-production"\n'
         '\n[[sunsetting]]\nver = "25.11"\nrev = "fc-25.11-production"\n'
     )
     return repo, src, versions
