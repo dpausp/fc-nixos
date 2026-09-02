@@ -10,18 +10,19 @@
  *     2026-08-18), the navigation tree stays undisplaced.
  *
  *   targetHref(entry, here) -> the SAME page in the target version as
- *     a zensical directory URL (<prefix><page-id>/, one step, no
+ *     a zensical .html URL (<prefix><page-id>.html, one step, no
  *     version-index detour) when the version's inventory carries the
  *     page-id; otherwise the version index with ?missing=<page-id>,
  *     where version-switcher-fallback.js explains what happened.
  *
- * URL spaces: "/" is the current version's space (the local tree),
+ * URL spaces: "/" is the stable version's space (the local tree),
  * "/<ver>/" a checked-out snapshot's (make checkout-versioned-docs).
  * Page-ids are URL-shaped and match the generated inventories in
  * window.PLATFORM_VERSIONS (make gen-platform-versions): tree-relative
  * paths sans .md with a trailing "index" component folded away -- the
  * root page has page-id "" and every href is prefix or
- * prefix + pageId + "/".
+ * prefix + pageId + ".html". Directory URLs are accepted on input for
+ * backwards compatibility.
  */
 window.VersionSwitcherUrls = {
   PRIMARY_MOUNT_SELECTOR: ".md-sidebar--primary .md-sidebar__inner",
@@ -29,7 +30,7 @@ window.VersionSwitcherUrls = {
 
   // The version entry whose URL space *path* lives in: the first path
   // segment matching a version's ver, else the entry serving "/" (the
-  // current version).
+  // stable version).
   entryFor: function (path, data) {
     var seg = path.replace(/^\/+/, "").split("/")[0];
     var v;
@@ -43,9 +44,23 @@ window.VersionSwitcherUrls = {
   },
 
   // path -> page-id relative to its version space ("" = manual root).
+  // Handles both directory URLs ("/components/docker/") and .html URLs
+  // ("/components/docker.html", "/components/docker/index.html", "/index.html").
   pageIdFor: function (path, entry) {
     var rest = entry && entry.index !== "/" ? path.slice(entry.index.length) : path;
-    return rest.replace(/^\/+|\/+$/g, "");
+    var pageId = rest.replace(/^\/+|\/+$/g, "");
+    if (pageId.endsWith(".html")) {
+      pageId = pageId.slice(0, -5);
+      if (pageId.endsWith("/index")) {
+        pageId = pageId.slice(0, -6);
+      } else if (pageId === "index") {
+        pageId = "";
+      }
+    }
+    if (pageId.endsWith("/index")) {
+      pageId = pageId.slice(0, -6);
+    }
+    return pageId;
   },
 
   // How many versions' inventories carry *pageId*.
@@ -73,7 +88,7 @@ window.VersionSwitcherUrls = {
   targetHref: function (entry, here) {
     var prefix = entry.pages ? entry.pages[here.pageId] : undefined;
     if (prefix !== undefined) {
-      return here.pageId === "" ? entry.index : prefix + here.pageId + "/";
+      return here.pageId === "" ? entry.index : prefix + here.pageId + ".html";
     }
     return entry.index + "?missing=" + here.pageId;
   },

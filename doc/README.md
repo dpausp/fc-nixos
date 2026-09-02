@@ -33,22 +33,22 @@ environment. You do not need a full Nix environment to build the docs!
 
 ## Documentation Versioning
 
-Versions are driven by `platform-versions.toml`: a `[current]` entry,
+Versions are driven by `platform-versions.toml`: a `[stable]` entry,
 `[[prerelease]]` and `[[sunsetting]]` entries, each naming a version and
 an **hg bookmark**. The categories describe the PUBLIC lifecycle
-(current release, upcoming release, phase-out) -- not who is built.
+(stable release, upcoming release, phase-out) -- not who is built.
 
 **The ACTIVE bookmark decides what you are building:** the entry whose
 `rev` matches the repo's active bookmark (`hg su`) IS the local manual
 at `/` and is never checked out. Every other entry -- including a
-non-matched `[current]` -- becomes a snapshot under `src/<ver>/` pulled
+non-matched `[stable]` -- becomes a snapshot under `src/<ver>/` pulled
 from its own branch. No active bookmark, or one the TOML does not know,
 fails the build loudly; there is no fallback.
 
 - `tools/checkout_versioned_docs.py` resolves bookmarks **strictly locally**
   (no pull, no network) and exports snapshots under `src/<ver>/`.
 - Non-sunsetting snapshot revisions (prerelease, or a non-matched
-  `[current]`) are exported from their whole `doc/src/**` tree.
+  `[stable]`) are exported from their whole `doc/src/**` tree.
 - `[[sunsetting]]` revisions must carry their docs namespaced at
   `doc/src/<ver>/**` -- created by the branch's one-time **sunset move
   commit** (`hg mv doc/src doc/src/<ver>`). A sunsetting revision without
@@ -68,7 +68,7 @@ page present in only one tree is a common page without its own switcher.
 
 ## Cross-Version Documents
 
-Global texts (security policies, support guidelines) live in the current
+Global texts (security policies, support guidelines) live in the stable
 tree. Older snapshots keep their own copies for contextual integrity; their
-banner links readers to the current counterpart. Keeping global texts
-current across snapshots is backport discipline on the version branches.
+banner links readers to the stable counterpart. Keeping global texts
+stable across snapshots is backport discipline on the version branches.

@@ -9,8 +9,9 @@
  * in (from window.PLATFORM_VERSIONS, see _static/platform-versions.js),
  * and links straight to the page in the first version that has it.
  *
- * Every link built here is a zensical DIRECTORY URL (<prefix><page-id>/),
- * like everywhere in the switcher asset family.
+ * Every link built here is a zensical .html URL (<prefix><page-id>.html),
+ * like everywhere in the switcher asset family (directory URLs are
+ * accepted on input for backwards compatibility).
  *
  * Inserted at the top of the page content (.md-content__inner), right
  * AFTER any sunsetting banner so the banner stays the first content
@@ -26,10 +27,20 @@
   var MISSING_PARAM = "missing";
 
   // The version entry whose index page this is (its index URL ends the path).
+  // Handles both directory URLs ("/26.05/") and html URLs
+  // ("/26.05/index.html", "/index.html").
   function locateVersion(path, data) {
+    var normalized = path;
+    if (normalized.endsWith("/index.html")) {
+      normalized = normalized.slice(0, -10);
+      if (normalized === "") normalized = "/";
+      else if (!normalized.endsWith("/")) normalized += "/";
+    } else if (normalized === "/index.html") {
+      normalized = "/";
+    }
     for (var v = 0; v < data.versions.length; v += 1) {
       var entry = data.versions[v];
-      if (path.slice(-entry.index.length) === entry.index) return entry;
+      if (normalized.slice(-entry.index.length) === entry.index) return entry;
     }
     return null;
   }
@@ -45,7 +56,8 @@
       var entry = data.versions[v];
       var prefix = entry.pages ? entry.pages[pageId] : undefined;
       if (prefix !== undefined) {
-        return { entry: entry, url: prefix + pageId + "/" };
+        var url = pageId === "" ? entry.index : prefix + pageId + ".html";
+        return { entry: entry, url: url };
       }
     }
     return null;

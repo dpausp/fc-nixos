@@ -10,10 +10,10 @@ trees into the committed switcher payload
   common pages with no switcher at all (content-agnostic on purpose:
   ``de/`` pages version exactly like any other page);
 - snapshot dirs never leak into the local inventory (``src/26.11/x.md``
-  is never a ``26.11/x`` page of the current version);
-- the ACTIVE bookmark decides which entry is the local manual: it
-  builds at ``/`` (payload ``current``), every other entry -- including
-  a non-matched ``[current]`` -- becomes a snapshot at ``/<ver>/``;
+  is never a ``26.11/x`` page of the stable version);
+ - the ACTIVE bookmark decides which entry is the local manual: it
+  builds at ``/`` (payload ``stable``), every other entry -- including
+  a non-matched ``[stable]`` -- becomes a snapshot at ``/<ver>/``;
 - missing snapshots of declared versions and orphan snapshot dirs of
   undeclared versions warn but never fail the run;
 - the rendered JS is deterministic and JSON-roundtrips into the exact
@@ -36,7 +36,7 @@ from tools import gen_platform_versions as gpv
 DOC = Path(__file__).resolve().parents[1]
 
 TOML = """\
-[current]
+[stable]
 ver = "26.05"
 rev = "fc-26.05-production"
 
@@ -96,7 +96,7 @@ def payload_for(
 ) -> dict:
     versions, src = doc_tree
     vset = gpv.load_versions(versions)
-    return gpv.build_payload(vset, matched or vset.current, src)
+    return gpv.build_payload(vset, matched or vset.stable, src)
 
 
 def by_ver(payload: dict) -> dict[str, dict]:
@@ -107,12 +107,12 @@ def test_payload_structure(doc_tree: tuple[Path, Path]) -> None:
     """Versions appear in canonical order with status, label and index."""
     payload = payload_for(doc_tree)
 
-    assert payload["current"] == "26.05"
+    assert payload["stable"] == "26.05"
     assert [
         (v["ver"], v["status"], v["index"], v["label"])
         for v in payload["versions"]
     ] == [
-        ("26.05", "current", "/", "26.05 (current)"),
+        ("26.05", "stable", "/", "26.05 (stable)"),
         ("26.11", "prerelease", "/26.11/", "26.11 (prerelease)"),
         ("25.11", "sunsetting", "/25.11/", "25.11 (sunsetting)"),
     ]
@@ -158,7 +158,7 @@ def test_common_pages_get_no_switcher_entry(
     assert "legacy" not in all_page_ids
 
 
-def test_snapshot_dirs_never_leak_into_current(
+def test_snapshot_dirs_never_leak_into_stable(
     doc_tree: tuple[Path, Path],
 ) -> None:
     """Local scan skips src/<NN.NN>/ -- no '26.11/...' page-ids at '/'."""
@@ -232,7 +232,7 @@ def test_main_writes_deterministic_output(
 
     assert gpv.main(argv) == 0
     first = out.read_text()
-    assert '"current": "26.05"' in first
+    assert '"stable": "26.05"' in first
 
     # main() reconfigures structlog, which would clobber capture_logs --
     # capsys sees the stderr-rendered event instead.
@@ -268,7 +268,7 @@ def test_module_invocation_via_python_m(
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert '"current": "26.05"' in out.read_text()
+    assert '"stable": "26.05"' in out.read_text()
 
 
 @pytest.mark.parametrize(
@@ -276,15 +276,15 @@ def test_module_invocation_via_python_m(
     [
         (
             '[[sunsetting]]\nver = "25.11"\nrev = "x"\n',
-            "no-current-section",
-            r"missing \[current\]",
+            "no-stable-section",
+            r"missing \[stable\]",
         ),
         (
-            '[current]\nver = "26.5"\nrev = "x"\n',
+            '[stable]\nver = "26.5"\nrev = "x"\n',
             "bad-ver-format",
             "must match NN.NN",
         ),
-        ('[current]\nver = "26.05"\n', "rev-missing", "non-empty string"),
+        ('[stable]\nver = "26.05"\n', "rev-missing", "non-empty string"),
         (
             TOML
             + '\n[[sunsetting]]\nver = "26.05"\nrev = "fc-26.05-production"\n',
@@ -314,7 +314,7 @@ def hg(repo: Path, *args: str) -> str:
 
 @pytest.fixture
 def hg_repo(tmp_path: Path) -> Path:
-    """Throwaway repo; bookmarks matching the TOML, current is ACTIVE."""
+    """Throwaway repo; bookmarks matching the TOML, stable is ACTIVE."""
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / "file.txt").write_text("x\n")
@@ -333,17 +333,17 @@ def hg_repo(tmp_path: Path) -> Path:
 def test_dev_build_labels_matched_version(
     doc_tree: tuple[Path, Path],
 ) -> None:
-    """Active prerelease builds at '/': current becomes the snapshot."""
+    """Active prerelease builds at '/': stable becomes the snapshot."""
     versions, _ = doc_tree
     matched = gpv.load_versions(versions).prereleases[0]
     payload = payload_for(doc_tree, matched)
 
-    assert payload["current"] == "26.11"
+    assert payload["stable"] == "26.11"
     entries = by_ver(payload)
     assert entries["26.11"]["index"] == "/"
     assert entries["26.11"]["pages"]["components/postgresql"] == "/"
     assert entries["26.05"]["index"] == "/26.05/"
-    assert entries["26.05"]["status"] == "current"
+    assert entries["26.05"]["status"] == "stable"
     assert entries["25.11"]["index"] == "/25.11/"
 
 

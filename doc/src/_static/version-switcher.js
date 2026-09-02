@@ -6,7 +6,7 @@
  * _static/version-switcher-urls.js:
  *
  *   window.PLATFORM_VERSIONS = {
- *     current: "<stable ver>",
+ *     stable: "<stable ver>",
  *     versions: [{ver, status, label, index, pages: {<page-id>: <prefix>}}]
  *   };
  *   window.VersionSwitcherUrls = {locate, targetHref, ...};

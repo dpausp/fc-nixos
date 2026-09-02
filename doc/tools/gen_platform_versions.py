@@ -6,7 +6,7 @@ Two inputs, both on disk and strictly local:
   whose ``rev`` is the repo's ACTIVE bookmark (:func:`match_active`)
   is the LOCAL manual: it builds at ``/`` and is never checked out,
   whatever its category. Every other entry -- including a non-matched
-  ``[current]`` -- is placed as a snapshot under ``src/<ver>/`` by
+  ``[stable]`` -- is placed as a snapshot under ``src/<ver>/`` by
   ``tools/checkout_versioned_docs.py`` (each builds at ``/<ver>/``).
 
 * the file trees -- the local ``src/`` tree plus every ``src/<ver>/``
@@ -16,7 +16,7 @@ Two inputs, both on disk and strictly local:
   content-agnostic: WHAT a page contains never matters, only WHETHER
   the file exists in a tree. Snapshot dirs never leak into the local
   inventory: top-level ``src/<NN.NN>/`` dirs are skipped when scanning
-  the current version.
+  the stable version.
 
 A page-id found in at least TWO trees is *versioned*: every version
 carrying it gets a ``pages`` entry mapping the page-id to its URL
@@ -71,7 +71,7 @@ class VersionEntry:
 
     ver: str
     rev: str
-    status: str  # "current" | "prerelease" | "sunsetting"
+    status: str  # "stable" | "prerelease" | "sunsetting"
 
     @property
     def label(self) -> str:
@@ -80,14 +80,14 @@ class VersionEntry:
 
 @dataclass(frozen=True, slots=True)
 class VersionSet:
-    """The declared versions in canonical order: current, then the rest."""
+    """The declared versions in canonical order: stable, then the rest."""
 
-    current: VersionEntry
+    stable: VersionEntry
     prereleases: tuple[VersionEntry, ...] = ()
     sunsettings: tuple[VersionEntry, ...] = ()
 
     def entries(self) -> list[VersionEntry]:
-        return [self.current, *self.prereleases, *self.sunsettings]
+        return [self.stable, *self.prereleases, *self.sunsettings]
 
 
 def _entry(section: str, raw: object, path: Path) -> VersionEntry:
@@ -104,7 +104,7 @@ def _entry(section: str, raw: object, path: Path) -> VersionEntry:
         msg = f"[{section}] rev must be a non-empty string, got {rev!r}"
         raise ValueError(msg)
     return VersionEntry(
-        ver=ver, rev=rev, status="current" if section == "current" else section
+        ver=ver, rev=rev, status="stable" if section == "stable" else section
     )
 
 
@@ -112,17 +112,17 @@ def load_versions(path: Path) -> VersionSet:
     """Parse and validate ``platform-versions.toml``.
 
     Raises :class:`ValueError` with a section-context message on any
-    schema violation (missing ``[current]``, malformed ver, duplicate
+    schema violation (missing ``[stable]``, malformed ver, duplicate
     ver across sections).
     """
     with path.open("rb") as fh:
         data = tomllib.load(fh)
 
-    if "current" not in data:
-        msg = f"missing [current] section in {path.name}"
+    if "stable" not in data:
+        msg = f"missing [stable] section in {path.name}"
         raise ValueError(msg)
 
-    entries = [_entry("current", data["current"], path)]
+    entries = [_entry("stable", data["stable"], path)]
     for section in ("prerelease", "sunsetting"):
         for raw in data.get(section, []):
             entries.append(_entry(section, raw, path))
@@ -135,7 +135,7 @@ def load_versions(path: Path) -> VersionSet:
         seen.add(entry.ver)
 
     return VersionSet(
-        current=entries[0],
+        stable=entries[0],
         prereleases=tuple(e for e in entries[1:] if e.status == "prerelease"),
         sunsettings=tuple(e for e in entries[1:] if e.status == "sunsetting"),
     )
@@ -216,7 +216,7 @@ def scan_page_ids(tree: Path, *, exclude_snapshots: bool = False) -> set[str]:
 
     With ``exclude_snapshots`` top-level snapshot dirs (``tree/26.05/``)
     are skipped -- that is how the LOCAL tree is scanned, so snapshots
-    never appear as ``26.05/...`` page-ids of the current version.
+    never appear as ``26.05/...`` page-ids of the stable version.
     """
     ids: set[str] = set()
     for page in tree.rglob("*.md"):
@@ -235,7 +235,7 @@ def build_payload(
     ``matched`` (the entry whose rev is the ACTIVE bookmark, see
     :func:`match_active`) builds at ``/``: the local ``src/`` tree IS
     its inventory. Every OTHER declared entry -- including a
-    non-matched ``[current]`` -- is a snapshot at ``/<ver>/`` whose
+    non-matched ``[stable]`` -- is a snapshot at ``/<ver>/`` whose
     inventory is scanned from ``src/<ver>/``. Missing snapshots of
     declared versions and orphan snapshot dirs of undeclared versions
     are warned about, never fatal -- the payload is still complete
@@ -300,7 +300,7 @@ def build_payload(
                 },
             }
         )
-    return {"current": matched.ver, "versions": payload_versions}
+    return {"stable": matched.ver, "versions": payload_versions}
 
 
 GENERATED_HEADER = (

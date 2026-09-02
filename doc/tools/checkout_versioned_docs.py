@@ -9,22 +9,22 @@ does not know, fails loudly -- no fallback of any kind.
 
 What gets exported depends on the status: ONLY prerelease revisions
 (the living dev line) export the WHOLE ``doc/src/**``; every other
-non-matched version -- sunsetting AND a non-matched ``[current]``
+non-matched version -- sunsetting AND a non-matched ``[stable]``
 alike -- exports ONLY its branch's namespaced ``doc/src/<ver>/**``
 (the one-time sunset move commit). A non-prerelease revision without
 that namespaced tree fails loudly with the remediation -- it NEVER
-falls back to the whole tree, which would duplicate the current
+falls back to the whole tree, which would duplicate the stable
 manual under a versioned URL.
 
 Every placed snapshot is made link-clean first:
 :mod:`tools.snapshot_content_fixes` re-applies the fix table already
 landed on the integration line (dead split-era targets, old
 fetch-era sunsetting banners) to the branch content. On top, every
-NON-prerelease snapshot -- sunsetting and a non-matched ``[current]``
+NON-prerelease snapshot -- sunsetting and a non-matched ``[stable]``
 alike -- gets ``search: exclude`` frontmatter (keeping it out of the
 search index) and a warning banner linking the counterpart in the
 built manual when it exists; only the banner wording differs (an old
-current's public status is current, never sunsetting). Otherwise
+stable's public status is stable, never sunsetting). Otherwise
 prerelease snapshots stay verbatim: they ARE the integration line.
 
 A manifest (``src/.checkout-manifest.json``) records the exported node
@@ -83,11 +83,11 @@ SEARCH_KEY_RE = re.compile(r"(?m)^search:")
 SEARCH_EXCLUDE_BLOCK = "search:\n  exclude: true\n"
 
 # Warning-banner sentence body per non-prerelease snapshot status. A
-# non-matched [current] gets the sunsetting treatment (search
-# exclusion + banner) but its public status is current: the wording
+# non-matched [stable] gets the sunsetting treatment (search
+# exclusion + banner) but its public status is stable: the wording
 # must never say "sunsetting".
 STATUS_CLAUSE = {
-    "current": "is an older version",
+    "stable": "is an older version",
     "sunsetting": "is in sunsetting",
 }
 
@@ -138,10 +138,10 @@ def ensure_namespaced_tree(repo: Path, entry: VersionEntry, node: str) -> None:
     """Fail loudly when the revision lacks ``doc/src/<ver>/``.
 
     Every NON-prerelease ``rev`` (sunsetting, or a non-matched
-    ``[current]``) must point at the sunset move commit that namespaced
+    ``[stable]``) must point at the sunset move commit that namespaced
     ``doc/src`` into ``doc/src/<ver>/``. A revision without that tree
     (e.g. a pre-move changeset carrying the whole ``doc/src``) must
-    NEVER fall back to it -- the snapshot would duplicate the current
+    NEVER fall back to it -- the snapshot would duplicate the stable
     manual under a versioned URL. ``hg files`` with an explicit
     ``path:`` kind asks hg directly whether the tree exists at *node*;
     empty output means it does not.
@@ -173,7 +173,7 @@ def checkout_version(
 
     Prerelease revisions export the WHOLE ``doc/src/**`` (the living
     dev line); every other status -- sunsetting and a non-matched
-    ``[current]`` alike -- only its branch's namespaced
+    ``[stable]`` alike -- only its branch's namespaced
     ``doc/src/<ver>/**`` (see :func:`ensure_namespaced_tree`).
     """
     if entry.status == "prerelease":
@@ -238,13 +238,13 @@ def frontmatter_with_search_exclude(frontmatter: str) -> str:
 
 
 def process_snapshot(
-    tree: Path, ver: str, status: str, current_ver: str, src_root: Path
+    tree: Path, ver: str, status: str, stable_ver: str, src_root: Path
 ) -> int:
     """Frontmatter + banner on every page of a non-prerelease snapshot.
 
     Order matters: frontmatter must stay the FIRST thing in the file
     (zensical only parses it there), the banner follows, then the
-    untouched body. The banner links the current counterpart only when
+    untouched body. The banner links the stable counterpart only when
     the page exists in the local tree -- a dead ref would break the
     build's link validation. ``status`` picks the banner wording
     (:data:`STATUS_CLAUSE`). Returns the number of processed pages.
@@ -262,7 +262,7 @@ def process_snapshot(
         page.write_text(
             frontmatter
             + "\n"
-            + banner(page_id, ver, current_ver, counterpart, clause)
+            + banner(page_id, ver, stable_ver, counterpart, clause)
             + body.lstrip("\n")
         )
         count += 1
@@ -271,20 +271,20 @@ def process_snapshot(
 
 
 def banner(
-    page_id: str, ver: str, current_ver: str, counterpart: bool, clause: str
+    page_id: str, ver: str, stable_ver: str, counterpart: bool, clause: str
 ) -> str:
-    """Warning banner; links the current counterpart if it exists."""
+    """Warning banner; links the stable counterpart if it exists."""
     up = "../" * (page_id.count("/") + 1)
     if counterpart:
         target = f"{up}{page_id}"
-        where = f"the [{current_ver} version]({target})"
+        where = f"the [{stable_ver} version]({target})"
     else:
-        where = f"the [{current_ver} manual]({up}index)"
+        where = f"the [{stable_ver} manual]({up}index)"
     return (
         f'!!! warning "Documentation for platform version {ver}"\n'
         f"    Platform version {ver} {clause} -- this page is kept for"
         " reference.\n"
-        f"    The current documentation for this topic is {where}.\n\n"
+        f"    The stable documentation for this topic is {where}.\n\n"
     )
 
 
@@ -313,7 +313,7 @@ def run_checkout(
     Shared by ``main`` and tests -- everything except argparse and log
     configuration lives here. The entry matched by the repo's ACTIVE
     bookmark IS the local manual and is never checked out; ALL other
-    entries become snapshots, a non-matched ``[current]`` included
+    entries become snapshots, a non-matched ``[stable]`` included
     (from its namespaced tree, like a sunsetting version). Every
     placement is made link-clean (content fixes) and every
     non-prerelease snapshot annotated (search-exclude frontmatter +

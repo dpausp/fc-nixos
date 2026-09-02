@@ -8,7 +8,7 @@ repository with bookmarks at two changesets). Pinned behavior:
   the matched entry IS the local manual and is never checked out; ALL
   other entries become snapshots. ONLY ``[[prerelease]]`` exports the
   whole ``doc/src/**`` tree (the living dev line); every other
-  non-matched version -- sunsetting AND ``[current]`` alike -- must
+  non-matched version -- sunsetting AND ``[stable]`` alike -- must
   carry its branch's namespaced ``doc/src/<ver>/**`` tree or fails
   loudly. No active bookmark, or one unknown to the TOML, fails loudly
   -- no fallback of any kind;
@@ -19,7 +19,7 @@ repository with bookmarks at two changesets). Pinned behavior:
 - missing bookmarks fail loudly (exit 1, ``pull`` hint on stderr) and
   place nothing;
 - sunsetting pages gain ``search: exclude`` frontmatter plus a warning
-  banner that links the current counterpart ONLY when it exists in the
+  banner that links the stable counterpart ONLY when it exists in the
   local tree (dead refs would break build-time link validation);
 - unchanged node + tool fingerprint = skip (manual tree edits
   survive), fingerprint change = re-place (fresh archive);
@@ -41,7 +41,7 @@ from tools import checkout_versioned_docs as cot
 DOC = Path(__file__).resolve().parents[1]
 
 TOML = """\
-[current]
+[stable]
 ver = "26.05"
 rev = "fc-26.05-production"
 
@@ -74,7 +74,7 @@ def project(tmp_path: Path) -> tuple[Path, Path, Path]:
     """(repo, doc-src-dir, versions-file).
 
     repo history:
-      r1 -- fc-26.05-production (current, ACTIVE): tree namespaced
+      r1 -- fc-26.05-production (stable, ACTIVE): tree namespaced
             at doc/src/26.05/** (postgresql v1, only-old)
       r2 -- fc-25.11-production (sunsetting source): tree namespaced
             at doc/src/25.11/** only
@@ -82,7 +82,7 @@ def project(tmp_path: Path) -> tuple[Path, Path, Path]:
             postgresql v2 and platform/users
 
     doc/ lives OUTSIDE the repo: its src/ is the local manual of the
-    ACTIVE bookmark (fc-26.05-production -> matched [current] 26.05)
+    ACTIVE bookmark (fc-26.05-production -> matched [stable] 26.05)
     with postgresql + redis + index.
     """
     repo = tmp_path / "repo"
@@ -101,7 +101,7 @@ def project(tmp_path: Path) -> tuple[Path, Path, Path]:
         "\n"
         "!!! warning\n"
         "    This is a sunsetting version of the platform documentation."
-        " Go to [the current version](../../platform-releases/"
+        " Go to [the stable version](../../platform-releases/"
         "fc-26.05-production/broken.md) for optimized support.\n"
         "\n"
         "See [local](../platform/fc-26.05-production/local.md#nixos-local)"
@@ -129,14 +129,14 @@ def project(tmp_path: Path) -> tuple[Path, Path, Path]:
     hg(repo, "bookmark", "-r", "0", "fc-26.05-production")
     hg(repo, "bookmark", "-r", "1", "fc-25.11-production")
     hg(repo, "bookmark", "-r", "2", "fc-26.11-dev")
-    # Activate the current bookmark LAST: the ACTIVE bookmark (not any
+    # Activate the stable bookmark LAST: the ACTIVE bookmark (not any
     # TOML category) defines which entry is the local manual.
     hg(repo, "up", "fc-26.05-production")
 
     doc = tmp_path / "doc"
     doc_src = doc / "src"
     put(doc_src, "index.md")
-    put(doc_src, "components/postgresql.md", "# local current\n")
+    put(doc_src, "components/postgresql.md", "# local stable\n")
     put(doc_src, "components/redis.md")
     versions = doc / "platform-versions.toml"
     versions.write_text(TOML)
@@ -181,7 +181,7 @@ def test_places_snapshots_from_bookmarks(
     assert set(manifest_of(project)["versions"]) == {"26.11", "25.11"}
 
 
-def test_current_is_never_checked_out(project: tuple[Path, Path, Path]) -> None:
+def test_stable_is_never_checked_out(project: tuple[Path, Path, Path]) -> None:
     """No src/26.05/ tree, no manifest entry -- fc-26.05-production is absent."""
     _, doc_src, _ = project
     assert run(project) == 0
@@ -210,7 +210,7 @@ def test_sunsetting_pages_get_frontmatter_and_banner(
 def test_banner_without_counterpart_links_manual_index(
     project: tuple[Path, Path, Path],
 ) -> None:
-    """A page without a current counterpart links the manual index instead."""
+    """A page without a stable counterpart links the manual index instead."""
     _, doc_src, _ = project
     assert run(project) == 0
 
@@ -421,11 +421,11 @@ def test_unknown_active_bookmark_fails_loudly(
     assert not (doc_src / "26.11").exists()
 
 
-def test_non_matched_current_requires_namespaced_tree(
+def test_non_matched_stable_requires_namespaced_tree(
     project: tuple[Path, Path, Path], capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """A non-matched [current] without doc/src/<ver>/: exit 1, no whole
-    tree. Pointing current at the dev bookmark (whole doc/src/** only)
+    """A non-matched [stable] without doc/src/<ver>/: exit 1, no whole
+    tree. Pointing stable at the dev bookmark (whole doc/src/** only)
     must fail loudly instead of nesting or duplicating the tree."""
     repo, doc_src, versions = project
     versions.write_text(TOML.replace("fc-26.05-production", "fc-26.11-dev"))
@@ -451,12 +451,12 @@ def test_placement_applies_content_fixes(
     assert "](../platform/local.md#nixos-local)" in text
 
 
-def test_old_current_snapshot_gets_banner_and_exclude(
+def test_old_stable_snapshot_gets_banner_and_exclude(
     project: tuple[Path, Path, Path],
 ) -> None:
     """26.05 (older than matched 26.11): search-exclude + banner like a
     sunsetting snapshot -- but WITHOUT 'sunsetting' wording, its public
-    status is current."""
+    status is stable."""
     repo, doc_src, _ = project
     hg(repo, "up", "fc-26.11-dev")
     assert run(project) == 0
