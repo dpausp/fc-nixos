@@ -4,8 +4,8 @@ Here you find information about changes compared to the previous platform
 version, what to consider and where to take action before upgrading.
 
 !!! note
-    Before upgrading a machine, please read the [nixos-upgrade-general](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-general)
-    and [nixos-upgrade-breaking](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-breaking).
+    Before upgrading a machine, please read the [nixos-upgrade-general](#nixos-upgrade-general)
+    and [nixos-upgrade-breaking](#nixos-upgrade-breaking).
     Contact our [support](../../support/index.md#support) for upgrade assistance.
 
 ## Overview { #nixos-upgrade-overview }
@@ -16,14 +16,14 @@ version, what to consider and where to take action before upgrading.
   - mongodb70
   - mongodb80
 - Removed roles:
-  - [percona80](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-percona)
+  - [percona80](#nixos-upgrade-percona)
 - Roles affected by significant breaking changes:
-  - [mailserver](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-mail)
-  - [mailstub](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-mail)
-  - [opensearch](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-opensearch)
-  - [slurm](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-slurm)
-  - [webproxy](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-webproxy)
-  - [k3s](../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-k3s)
+  - [mailserver](#nixos-upgrade-mail)
+  - [mailstub](#nixos-upgrade-mail)
+  - [opensearch](#nixos-upgrade-opensearch)
+  - [slurm](#nixos-upgrade-slurm)
+  - [webproxy](#nixos-upgrade-webproxy)
+  - [k3s](#nixos-upgrade-k3s)
 - Removed significant packages:
   - `python310`
   - `k3s_1_32`
@@ -70,7 +70,7 @@ Here are some remarks to make sure that an upgrade will run successfully:
 
 As a general advice: reduce platform dependencies of your application
 deployment by using Nix-managed service user environments as described in
-[nixos-user-package-management](../../platform-releases/fc-26.05-production/user_profile.md#nixos-user-package-management) or other forms of dependency isolation
+[nixos-user-package-management](user-profile.md#nixos-user-package-management) or other forms of dependency isolation
 like containers.
 
 ### Upgrade staging first
@@ -147,7 +147,7 @@ We removed the `percona80` role, as MySQL 8.0 is end-of-life and Percona 8.0 is 
 
 Please upgrade to `percona84` by changing the role of the VM to `percona84` before upgrading the VM to fc-nixos 26.05.
 This upgrade happens then in place with the requirement that you previously used `percona80`.
-Read the [role-documentation](../../platform-releases/fc-26.05-production/mysql.md#nixos-mysql-upgrade) for more information about the upgrade path.
+Read the [role-documentation](../components/mysql.md#nixos-mysql-upgrade) for more information about the upgrade path.
 
 Percona Server 8.4 now has `caching_sha2_password` as default authentication plugin.
 This means that new user passwords are hashed with this mechanism and clients need to support this.
@@ -164,7 +164,7 @@ There is no in-place migration from Percona to MariaDB.
 ### Slurm { #nixos-upgrade-slurm }
 
 This release contains a major version upgrade of Slurm from 25.05.x.x (NixOS 25.11) to 25.11.x.x. Nodes of a cluster
-need to be upgraded in a particular order, please consult the [upgrade instructions of the role](../../platform-releases/fc-26.05-production/slurm.md#nixos-slurm-upgrade)
+need to be upgraded in a particular order, please consult the [upgrade instructions of the role](../components/slurm.md#nixos-slurm-upgrade)
 for details.
 
 Regarding new features or changes in Slurm itself,
@@ -464,7 +464,7 @@ The update happens in place when upgrading the VM with the opensearch role to fc
 The Varnish Cache open-source project renamed itself to Vinyl Cache.
 We follow this rename and use Vinyl Cache 9 as the new default package for the `webproxy` role.
 We still allow using Varnish Cache 8 in this release, but will remove this option with fc-nixos 26.11,
-read the [role documentation](../../platform-releases/fc-26.05-production/webproxy.md#nixos-webproxy) for more information on how to use Varnish Cache 8.
+read the [role documentation](../components/webproxy.md#nixos-webproxy) for more information on how to use Varnish Cache 8.
 
 The project [`varnish-modules`](https://github.com/varnish/varnish-modules), which is published under `pkgs.varnish80Packages.modules` is not available for Vinyl Cache 9, as it is incompatible.
 
@@ -488,12 +488,12 @@ upgrading to 26.05.
 
 However, adding new agent VM's to clusters upgraded from older platform versions
 may require extra configuration due to the change in defaults. See the
-[role documentation](../../platform-releases/fc-26.05-production/kubernetes.md#nixos-k3s-ipv6) for IPv6 support in k3s for further
+[role documentation](../components/kubernetes.md#nixos-k3s-ipv6) for IPv6 support in k3s for further
 information.
 
 The default `k3s` package has also been bumped to 1.33. Existing clusters may
 need to be updated to this version before upgrading cluster VM's to the 26.05
-platform. See the role documentation for [cluster version updates](../../platform-releases/fc-26.05-production/kubernetes.md#nixos-k3s-update-versions).
+platform. See the role documentation for [cluster version updates](../components/kubernetes.md#nixos-k3s-update-versions).
 
 ## Other notable changes
 

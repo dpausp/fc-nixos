@@ -1,6 +1,6 @@
 # Mail stub { #nixos-mailstub }
 
-The `mailstub` role provides a minimal Postfix which is mostly usable to locally collect and queue mails to hand them off to another mail server for actual delivery (relay). Sending email directly will not work well due to spam protection measures on the receiving side. Notably the mail stub does not configure DKIM signing – use [nixos-mailserver](../../platform-releases/fc-26.05-production/mailserver.md#nixos-mailserver).
+The `mailstub` role provides a minimal Postfix which is mostly usable to locally collect and queue mails to hand them off to another mail server for actual delivery (relay). Sending email directly will not work well due to spam protection measures on the receiving side. Notably the mail stub does not configure DKIM signing – use [nixos-mailserver](mailserver.md#nixos-mailserver).
 
 Configuring Postfix is possible in NixOS configuration in the `services.postfix` module.
 

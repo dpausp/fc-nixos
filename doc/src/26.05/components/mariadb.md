@@ -69,7 +69,7 @@ first startup, the NixOS option `services.percona.initialScript` can be set to a
 file containing such SQL commands.
 
 !!! caution
-    This is mainly useful for [nixos-devhost](../../platform-releases/fc-26.05-production/devhost.md#nixos-devhost) deployments, as the script will only
+    This is mainly useful for [nixos-devhost](devhost.md#nixos-devhost) deployments, as the script will only
     be executed at first startup and is ignored afterwards.
 
     Enabling a Percona role first and only setting an initial script later won't have

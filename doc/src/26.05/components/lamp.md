@@ -6,7 +6,7 @@ used to easily run a production-ready PHP application server.
 !!! note
     The Apache configured by this role does not bind / open firewall ports to the
     frontend network automatically. It is not intended to serve applications
-    directly to consumers but should be placed behind a [webgateway](../../platform-releases/fc-26.05-production/webgateway.md#nixos-webgateway).
+    directly to consumers but should be placed behind a [webgateway](webgateway.md#nixos-webgateway).
 
 ## Configuration
 

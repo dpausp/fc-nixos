@@ -64,7 +64,7 @@ Booleans in Nix (true/false) are converted to on/off in the PostgreSQL config.
 
 Run `sudo fc-manage switch` to activate the changes (**restarts PostgreSQL!**).
 
-See [nixos-custom-modules](../../platform-releases/fc-26.05-production/local.md#nixos-custom-modules) for general information about writing NixOS
+See [nixos-custom-modules](../platform/local.md#nixos-custom-modules) for general information about writing NixOS
 modules.
 
 ## Interaction
@@ -87,7 +87,7 @@ We use the following Sensu checks to monitor the availability of PostgreSQL:
   and checks if a TCP connection can be established.
 
 Telegraf is used to export metrics for PostgreSQL. Telegraf connects as
-`fcio_monitoring` database user. Metrics can be viewed when a [nixos-statshost](../../platform-releases/fc-26.05-production/statshost.md#nixos-statshost)
+`fcio_monitoring` database user. Metrics can be viewed when a [nixos-statshost](statshost.md#nixos-statshost)
 is present, using the `FCIO/PostgreSQL` dashboard.
 
 ## Platform-created Databases

@@ -15,7 +15,7 @@ mechanism for user management besides text files.
 
 The main ingredients of this role are [Postfix] for mail delivery, [Dovecot] as
 IMAP access server, and [Roundcube] as web frontend.
-[nixos-postgresql-server](../../platform-releases/fc-26.05-production/postgresql.md#nixos-postgresql-server) is used as a database to store Roundcube settings.
+[nixos-postgresql-server](postgresql.md#nixos-postgresql-server) is used as a database to store Roundcube settings.
 
 We rely mainly on [Rspamd] for spam protection and DKIM signing.
 A basic [SPF] and [SRS] setup is included as well.
@@ -288,7 +288,7 @@ Mail domain
 ### Role options
 
 All options can be set in `/etc/local/mail/config.json`
-or in [Nix config](../../platform-releases/fc-26.05-production/local.md#nixos-custom-modules) with the prefix *flyingcircus.roles.mailserver*.
+or in [Nix config](../platform/local.md#nixos-custom-modules) with the prefix *flyingcircus.roles.mailserver*.
 
 Frequently used options:
 
@@ -296,7 +296,7 @@ domains (attribute set (object) or list)
 
 : *mail domains* which should be served by this mail server.
   Keys of the set are the domains, values are options for a specific domain.
-  You can find these options below. See [nixos-mailserver-basic-setup](../../platform-releases/fc-26.05-production/mailserver.md#nixos-mailserver-basic-setup)
+  You can find these options below. See [nixos-mailserver-basic-setup](#nixos-mailserver-basic-setup)
   for a working example.
 
   The option still supports a list of strings instead of a attribute set (object).
@@ -334,7 +334,7 @@ rootAlias
 dynamicMaps
 
 : Hash map of Postfix maps (like [transport]) and one or more file paths
-  containing map records. See section [mail-into-backends](../../platform-releases/fc-26.05-production/mailserver.md#mail-into-backends) for details.
+  containing map records. See section [mail-into-backends](#mail-into-backends) for details.
 
 Specialist options:
 

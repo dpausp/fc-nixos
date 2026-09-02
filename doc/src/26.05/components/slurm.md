@@ -147,11 +147,11 @@ to existing clusters.
 !!! note
     For autoconfiguration, all slurm machines must have the same
     amount of memory and CPU cores. If that's not the case, memory and CPU cores must
-    be set manually. See the [nixos-slurm-config-reference](../../platform-releases/fc-26.05-production/slurm.md#nixos-slurm-config-reference) on how to do that.
+    be set manually. See the [nixos-slurm-config-reference](#nixos-slurm-config-reference) on how to do that.
 
 This role runs `slurmctld`. We add basic Cluster readiness monitoring
 via Sensu and telemetry via Telegraf which can be ingested by a
-[nixos-statshost](../../platform-releases/fc-26.05-production/statshost.md#nixos-statshost) and displayed using a Grafana dashboard.
+[nixos-statshost](statshost.md#nixos-statshost) and displayed using a Grafana dashboard.
 
 At the moment, we only support exactly one controller per cluster.
 
@@ -171,7 +171,7 @@ in maintenance.
     At the moment, this role must run on the same machine as `slurm-controller`.
 
 Runs `slurmdbd` which is needed for job accounting. Automatically sets up a
-[nixos-mysql](../../platform-releases/fc-26.05-production/mysql.md#nixos-mysql) database with our platform defaults and
+[nixos-mysql](mysql.md#nixos-mysql) database with our platform defaults and
 monitoring/telemetry.
 
 
@@ -196,7 +196,7 @@ platform management task run (every 10 minutes).
     Nodes that had an unexpected reboot or have been drained/downed manually
     are not set to `ready` automatically by the platform management task. You
     have to do that manually using one of the `ready` subcommands described in
-    [nixos-fc-slurm](../../platform-releases/fc-26.05-production/slurm.md#nixos-fc-slurm).
+    [nixos-fc-slurm](#nixos-fc-slurm).
 
 ### slurm-external-dependency
 
@@ -320,7 +320,7 @@ When upgrading nodes between different *major versions* of Slurm, this need to h
 Machines only running the `slurm-external-dependency` role can be updated independently.
 
 *Major versions* of slurm are denoted by the first two numbers of a version string, making 23.04.2 and 23.11.1 different major releases. \
-When running the default Slurm versions provided by our platform, such major upgrades only happen between major platform releases and are listed in the [upgrade notes](../../platform-releases/fc-26.05-production/upgrade.md#nixos-upgrade).
+When running the default Slurm versions provided by our platform, such major upgrades only happen between major platform releases and are listed in the [upgrade notes](../platform/upgrades-whats-new.md#nixos-upgrade).
 
 ## Configuration reference { #nixos-slurm-config-reference }
 
