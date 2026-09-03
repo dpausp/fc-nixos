@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out the monorepo with all mirror branches
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -31,11 +31,13 @@ jobs:
         with:
           python-version: "3.13"
 
-      # Exactly pinned: moving major tags are gone from v8 on, and a
-      # floating tag would silently change the toolchain. The cache is
-      # keyed on uv.lock (the action's default dependency glob).
+      # Pinned to an exact immutable release: setup-uv publishes no
+      # major/minor moving tags since v8.0.0 (supply-chain policy),
+      # so '@v10' would not resolve at all -- only the full version
+      # tag is a valid, silent-change-proof pin. The cache is keyed
+      # on uv.lock (the action's default dependency glob).
       - name: Install pinned uv with lockfile cache
-        uses: astral-sh/setup-uv@8.0.0
+        uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
 
