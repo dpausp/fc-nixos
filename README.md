@@ -157,7 +157,7 @@ Start the live-reloading preview at http://localhost:8000:
     cd doc
     ./appenv python -m zensical serve -f zensical.toml
 
-Or build the static HTML into `doc/_build/en/`:
+Or build the static HTML into `doc/_build/`:
 
     ./appenv python -m zensical build -f zensical.toml
 
