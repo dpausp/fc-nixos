@@ -28,34 +28,54 @@ environment. You do not need a full Nix environment to build the docs!
    | Target | What it does |
    | --- | --- |
    | `make gen-platform-versions` | Regenerates `src/_static/platform-versions.js` from `platform-versions.toml` and the page inventory |
-   | `make checkout-versioned-docs` | Places version snapshots under `src/<ver>/` from local hg revisions |
-   | `make html` | Builds the static HTML into `_build/en/` |
+   | `make checkout-versioned-docs` | Places version snapshots under `src/<ver>/` from local revisions |
+   | `make html` | Builds the static HTML into `_build/` |
 
 ## Documentation Versioning
 
 Versions are driven by `platform-versions.toml`: a `[stable]` entry,
 `[[prerelease]]` and `[[sunsetting]]` entries, each naming a version and
-an **hg bookmark**. The categories describe the PUBLIC lifecycle
-(stable release, upcoming release, phase-out) -- not who is built.
+a **rev** -- an hg bookmark locally, a git mirror branch in CI. The
+categories describe the PUBLIC lifecycle (stable release, upcoming
+release, phase-out) -- not who is built.
 
-**The ACTIVE bookmark decides what you are building:** the entry whose
-`rev` matches the repo's active bookmark (`hg su`) IS the local manual
-at `/` and is never checked out. Every other entry -- including a
-non-matched `[stable]` -- becomes a snapshot under `src/<ver>/` pulled
-from its own branch. No active bookmark, or one the TOML does not know,
-fails the build loudly; there is no fallback.
+**The matched rev decides what you are building:** the entry whose `rev`
+is matched IS the local manual at `/` and is never checked out. Every
+other entry -- including a non-matched `[stable]` -- becomes a snapshot
+under `src/<ver>/` pulled from its own branch. An unresolvable match
+fails the build loudly; there is no fallback. The VCS backend is
+auto-detected at the repository path:
 
-- `tools/checkout_versioned_docs.py` resolves bookmarks **strictly locally**
-  (no pull, no network) and exports snapshots under `src/<ver>/`.
-- Non-sunsetting snapshot revisions (prerelease, or a non-matched
-  `[stable]`) are exported from their whole `doc/src/**` tree.
-- `[[sunsetting]]` revisions must carry their docs namespaced at
-  `doc/src/<ver>/**` -- created by the branch's one-time **sunset move
-  commit** (`hg mv doc/src doc/src/<ver>`). A sunsetting revision without
-  that directory fails the build loudly with the remediation hint; there is
-  deliberately **no fallback** to the whole-tree shape for old versions.
-- Sunsetting pages receive `search: exclude` frontmatter and a warning banner
-  linking to the counterpart in the built manual when it exists locally.
+- **hg (local):** the ACTIVE bookmark (`hg su`) selects the manual.
+  `tools/checkout_versioned_docs.py` resolves bookmarks **strictly
+  locally** (no pull, no network) and exports snapshots under
+  `src/<ver>/`.
+- **git (CI):** the TOML `rev`s ARE the GitHub mirror branch names,
+  resolved as `refs/remotes/origin/<branch>` of a full clone. The
+  matched ref comes from `--matched`, falling back to `GITHUB_REF_NAME`
+  (the branch GitHub Actions built); with neither set the build fails
+  loudly. Export runs via `git archive | tar` with the archive prefix
+  stripped.
+
+Snapshot shapes are backend-independent: non-sunsetting snapshot
+revisions (prerelease, or a non-matched `[stable]`) are exported from
+their whole `doc/src/**` tree, and `[[sunsetting]]` revisions must carry
+their docs namespaced at `doc/src/<ver>/**` -- created by the branch's
+one-time **sunset move commit** (`hg mv doc/src doc/src/<ver>`). A
+sunsetting revision without that directory fails the build loudly with
+the remediation hint; there is deliberately **no fallback** to the
+whole-tree shape for old versions. Sunsetting pages receive
+`search: exclude` frontmatter and a warning banner linking to the
+counterpart in the built manual when it exists locally.
+
+## Continuous Integration
+
+`.github/workflows/docs.yml` builds the manual on every push touching
+`doc/**` (and on `workflow_dispatch`): full-history checkout (all
+mirror branches are needed to resolve the TOML revs), Python 3.13, an
+exactly pinned `uv` with a cache keyed on `uv.lock`, then `make` in
+`doc/`. The HTML lands in `_build/` and is uploaded as a workflow
+artifact; publishing is out of scope for the workflow.
 
 ## Version Switcher
 
@@ -72,7 +92,7 @@ master-centric and inverted:
 }
 ```
 
-`master` is the ACTIVE bookmark's version (the manual built at `/`);
+`master` is the matched entry's version (the manual built at `/`);
 `pages` has keys only for master pages carried by at least one snapshot,
 each value listing the carrying snapshot versions (without the master) in
 canonical TOML order. A page present only in the master tree is a common

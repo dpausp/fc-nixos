@@ -1,11 +1,13 @@
-"""Place version snapshots under ``src/<ver>/`` from LOCAL hg revisions.
+"""Place version snapshots under ``src/<ver>/`` from LOCAL VCS revisions.
 
-The counterpart of ``tools.gen_platform_versions.py``: the entry whose
-``rev`` is the repo's ACTIVE bookmark is the local manual -- never
-checked out. Every OTHER entry in ``platform-versions.toml`` is
-resolved STRICTLY locally (``hg log -r <rev>``, no network, no pull)
-and exported into ``src/<ver>/``. No active bookmark, or one the TOML
-does not know, fails loudly -- no fallback of any kind.
+The counterpart of ``tools.gen_platform_versions.py``: the entry
+matched by :mod:`tools.vcs_backend` (the hg repo's ACTIVE bookmark
+locally, or the ``--matched`` ref in a git mirror clone) is the local
+manual -- never checked out. Every OTHER entry in
+``platform-versions.toml`` is resolved STRICTLY locally (hg:
+``hg log -r <rev>``, git: ``git rev-parse refs/remotes/origin/<rev>``
+-- no network, no pull/fetch) and exported into ``src/<ver>/``.
+An unresolvable rev fails loudly -- no fallback of any kind.
 
 What gets exported depends on the status: ONLY prerelease revisions
 (the living dev line) export the WHOLE ``doc/src/**``; every other
@@ -27,11 +29,12 @@ built manual when it exists; only the banner wording differs (an old
 stable's public status is stable, never sunsetting). Otherwise
 prerelease snapshots stay verbatim: they ARE the integration line.
 
-A manifest (``src/.checkout-manifest.json``) records the exported node
-per version plus this tool's sha256. A version is skipped when BOTH
-are unchanged -- re-running never clobbers the placed tree, and editing
-this tool re-places every version (banner/frontmatter logic may have
-changed). Undeclared ``src/<NN.NN>/`` dirs are pruned.
+A manifest (``src/.checkout-manifest.json``) records the exported ref
+(node hash or mirror-branch sha) per version plus this tool's sha256. A
+version is skipped when BOTH are unchanged -- re-running never clobbers
+the placed tree, and editing this tool re-places every version
+(banner/frontmatter logic may have changed). Undeclared
+``src/<NN.NN>/`` dirs are pruned.
 
 Regenerate via ``make checkout-versioned-docs`` (then
 ``make gen-platform-versions`` to refresh the switcher payload).
@@ -44,7 +47,6 @@ import hashlib
 import json
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 from collections.abc import Sequence
@@ -55,23 +57,34 @@ import structlog
 from tools.gen_platform_versions import (
     DOC_ROOT,
     REPO_ROOT,
-    ActiveBookmarkError,
     VersionEntry,
     load_versions,
-    match_active,
 )
 from tools.snapshot_content_fixes import fix_tree
+from tools.vcs_backend import (
+    GitBackend,
+    HgBackend,
+    NamespacedTreeError,
+    VcsError,
+    detect_backend,
+    matched_entry,
+)
 
 log = structlog.get_logger()
 
 # Only doc/src of a revision becomes a snapshot: the whole tree for a
 # prerelease, just the namespaced subtree for every other status.
-ARCHIVE_INCLUDE = "doc/src/**"
+MASTER_SUBTREE = Path("doc") / "src"
+
+
+def namespaced_subtree(ver: str) -> Path:
+    """Repo-relative subtree of a non-prerelease version's branch."""
+    return MASTER_SUBTREE / ver
 
 
 def namespaced_include(ver: str) -> str:
     """Archive include pattern for a non-prerelease version's subtree."""
-    return f"doc/src/{ver}/**"
+    return f"{namespaced_subtree(ver).as_posix()}/**"
 
 
 # Manifest lives (hidden) at the src/ root, beside the snapshot dirs.
@@ -92,33 +105,6 @@ STATUS_CLAUSE = {
 }
 
 
-class CheckoutError(RuntimeError):
-    """A version could not be resolved or exported -- fail loudly."""
-
-
-def resolve_node(repo: Path, rev: str) -> str:
-    """Resolve ``rev`` to a node hash, strictly locally.
-
-    Missing bookmarks raise :class:`CheckoutError` with the hg abort
-    message -- the caller must surface it, the user must pull. This
-    tool never touches the network.
-    """
-    proc = subprocess.run(
-        ["hg", "log", "-r", rev, "-T", "{node}"],
-        cwd=repo,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if proc.returncode != 0:
-        msg = (
-            f"cannot resolve rev {rev!r} locally ({proc.stderr.strip()}) -- "
-            "pull the bookmark into your clone yourself; this tool never pulls"
-        )
-        raise CheckoutError(msg)
-    return proc.stdout.strip()
-
-
 def tool_fingerprint() -> str:
     """sha256 of this file -- forces re-placement when the tool changes."""
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -134,7 +120,9 @@ def write_manifest(path: Path, manifest: dict) -> None:
     path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n")
 
 
-def ensure_namespaced_tree(repo: Path, entry: VersionEntry, node: str) -> None:
+def ensure_namespaced_tree(
+    backend: HgBackend | GitBackend, entry: VersionEntry, ref: str
+) -> None:
     """Fail loudly when the revision lacks ``doc/src/<ver>/``.
 
     Every NON-prerelease ``rev`` (sunsetting, or a non-matched
@@ -142,69 +130,51 @@ def ensure_namespaced_tree(repo: Path, entry: VersionEntry, node: str) -> None:
     ``doc/src`` into ``doc/src/<ver>/``. A revision without that tree
     (e.g. a pre-move changeset carrying the whole ``doc/src``) must
     NEVER fall back to it -- the snapshot would duplicate the stable
-    manual under a versioned URL. ``hg files`` with an explicit
-    ``path:`` kind asks hg directly whether the tree exists at *node*;
-    empty output means it does not.
+    manual under a versioned URL. The backend asks its VCS directly
+    (hg: ``hg files path:``, git: ``git ls-tree``) whether the tree
+    exists at *ref*; empty output means it does not.
     """
-    proc = subprocess.run(
-        ["hg", "files", "-r", node, f"path:doc/src/{entry.ver}"],
-        cwd=repo,
-        capture_output=True,
-        text=True,
-        check=False,
+    if backend.has_subtree(ref, namespaced_subtree(entry.ver).as_posix()):
+        return
+    msg = (
+        f"{entry.status} revision {ref[:12]} for ver {entry.ver} has "
+        f"no doc/src/{entry.ver}/ tree -- every non-prerelease "
+        f"snapshot must carry its branch's namespaced "
+        f"doc/src/{entry.ver}/ subtree: point rev at the changeset "
+        f"that moved doc/src into doc/src/{entry.ver}/ (the sunset "
+        f"move); revisions carrying only the whole doc/src tree are "
+        f"never a fallback"
     )
-    if proc.returncode != 0 or not proc.stdout.strip():
-        msg = (
-            f"{entry.status} revision {node[:12]} for ver {entry.ver} has "
-            f"no doc/src/{entry.ver}/ tree -- every non-prerelease "
-            f"snapshot must carry its branch's namespaced "
-            f"doc/src/{entry.ver}/ subtree: point rev at the changeset "
-            f"that moved doc/src into doc/src/{entry.ver}/ (the sunset "
-            f"move); revisions carrying only the whole doc/src tree are "
-            f"never a fallback"
-        )
-        raise CheckoutError(msg)
+    raise NamespacedTreeError(msg)
 
 
 def checkout_version(
-    repo: Path, src_root: Path, entry: VersionEntry, node: str
+    backend: HgBackend | GitBackend,
+    src_root: Path,
+    entry: VersionEntry,
+    ref: str,
 ) -> Path:
-    """Export ``node``'s docs as ``src_root/<ver>/`` (replacing any old tree).
+    """Export ``ref``'s docs as ``src_root/<ver>/`` (replacing any old tree).
 
     Prerelease revisions export the WHOLE ``doc/src/**`` (the living
     dev line); every other status -- sunsetting and a non-matched
     ``[stable]`` alike -- only its branch's namespaced
-    ``doc/src/<ver>/**`` (see :func:`ensure_namespaced_tree`).
+    ``doc/src/<ver>/**`` (see :func:`ensure_namespaced_tree`). The
+    backend's export strips its own prefixes: pages land at the TOP
+    of ``src_root/<ver>/`` for both hg and git.
     """
     if entry.status == "prerelease":
-        include = ARCHIVE_INCLUDE
-        exported_subtree = Path("doc") / "src"
+        subtree = MASTER_SUBTREE
     else:
-        ensure_namespaced_tree(repo, entry, node)
-        include = namespaced_include(entry.ver)
-        exported_subtree = Path("doc") / "src" / entry.ver
+        ensure_namespaced_tree(backend, entry, ref)
+        subtree = namespaced_subtree(entry.ver)
     with tempfile.TemporaryDirectory() as tmp:
-        proc = subprocess.run(
-            ["hg", "archive", "-r", node, "-I", include, tmp],
-            cwd=repo,
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-        if proc.returncode != 0:
-            msg = f"hg archive failed for {entry.ver} ({node[:12]}): {proc.stderr.strip()}"
-            raise CheckoutError(msg)
-        exported = Path(tmp) / exported_subtree
-        if not exported.is_dir():
-            msg = (
-                f"revision {node[:12]} ({entry.ver}) has no "
-                f"{exported_subtree.as_posix()} tree -- nothing to place"
-            )
-            raise CheckoutError(msg)
+        staging = Path(tmp) / "out"
+        backend.export_tree(ref, subtree, staging)
         target = src_root / entry.ver
         if target.exists():
             shutil.rmtree(target)
-        shutil.move(str(exported), str(target))
+        shutil.move(str(staging), str(target))
     return target
 
 
@@ -306,28 +276,27 @@ def prune_orphans(src_root: Path, keep: set[str]) -> list[str]:
 
 
 def run_checkout(
-    versions_path: Path, src_root: Path, repo: Path
+    versions_path: Path,
+    src_root: Path,
+    repo: Path,
+    matched_ref: str | None = None,
 ) -> tuple[int, int, list[str]]:
     """Checkout driver: (checked-out, skipped, pruned) counts.
 
     Shared by ``main`` and tests -- everything except argparse and log
-    configuration lives here. The entry matched by the repo's ACTIVE
-    bookmark IS the local manual and is never checked out; ALL other
-    entries become snapshots, a non-matched ``[stable]`` included
-    (from its namespaced tree, like a sunsetting version). Every
-    placement is made link-clean (content fixes) and every
-    non-prerelease snapshot annotated (search-exclude frontmatter +
-    warning banner).
+    configuration lives here. The entry selected by the VCS seam
+    (:func:`tools.vcs_backend.matched_entry`: ACTIVE bookmark for hg,
+    ``matched_ref``/``GITHUB_REF_NAME`` for git) IS the local manual
+    and is never checked out; ALL other entries become snapshots, a
+    non-matched ``[stable]`` included (from its namespaced tree, like
+    a sunsetting version). Every placement is made link-clean (content
+    fixes) and every non-prerelease snapshot annotated (search-exclude
+    frontmatter + warning banner).
     """
     versions = load_versions(versions_path)
-    matched = match_active(versions, repo)
-    log.info(
-        "active-bookmark-matched",
-        ver=matched.ver,
-        rev=matched.rev,
-        status=matched.status,
-    )
-    entries = [e for e in versions.entries() if e.ver != matched.ver]
+    backend = detect_backend(repo)
+    manual = matched_entry(versions, repo, matched_ref)
+    entries = [e for e in versions.entries() if e.ver != manual.ver]
 
     manifest_path = src_root / MANIFEST_NAME
     manifest = load_manifest(manifest_path)
@@ -339,23 +308,21 @@ def run_checkout(
     checked = skipped = 0
 
     for entry in entries:
-        node = resolve_node(repo, entry.rev)
-        if same_tool and recorded.get(entry.ver, {}).get("node") == node:
-            log.info("checkout-skipped", ver=entry.ver, node=node[:12])
+        ref = backend.resolve_ref(entry.rev)
+        if same_tool and recorded.get(entry.ver, {}).get("ref") == ref:
+            log.info("checkout-skipped", ver=entry.ver, ref=ref[:12])
             skipped += 1
-            result["versions"][entry.ver] = {"node": node}
+            result["versions"][entry.ver] = {"ref": ref}
             continue
-        tree = checkout_version(repo, src_root, entry, node)
-        log.info(
-            "checkout-placed", ver=entry.ver, node=node[:12], path=str(tree)
-        )
+        tree = checkout_version(backend, src_root, entry, ref)
+        log.info("checkout-placed", ver=entry.ver, ref=ref[:12], path=str(tree))
         fixed = fix_tree(tree)
         log.info("content-fixes-applied", ver=entry.ver, pages=fixed)
         if entry.status != "prerelease":
             process_snapshot(
-                tree, entry.ver, entry.status, matched.ver, src_root
+                tree, entry.ver, entry.status, manual.ver, src_root
             )
-        result["versions"][entry.ver] = {"node": node}
+        result["versions"][entry.ver] = {"ref": ref}
         checked += 1
 
     pruned = prune_orphans(src_root, set(result["versions"]))
@@ -384,30 +351,37 @@ def _configure_logging() -> None:
 def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry: ``python -m tools.checkout_versioned_docs``.
 
-    Exit codes: ``0`` (placed/skipped/pruned), ``1`` (rev resolution or
-    archive failure, or no/unknown active bookmark), ``2`` (invalid
+    Exit codes: ``0`` (placed/skipped/pruned), ``1`` (rev resolution,
+    export, or matched-ref failure), ``2`` (invalid
     platform-versions.toml).
     """
     _configure_logging()
     parser = argparse.ArgumentParser(
         prog="checkout_versioned_docs",
-        description="Place src/<ver>/ snapshots from local hg revisions (prerelease + sunsetting).",
+        description="Place src/<ver>/ snapshots from local revisions (hg working copy or git mirror clone).",
     )
     parser.add_argument(
         "--versions", type=Path, default=DOC_ROOT / "platform-versions.toml"
     )
     parser.add_argument("--src", type=Path, default=DOC_ROOT / "src")
     parser.add_argument("--repo", type=Path, default=REPO_ROOT)
+    parser.add_argument(
+        "--matched",
+        metavar="REV",
+        default=None,
+        help="Rev whose entry IS the manual at '/' (default: the ACTIVE "
+        "bookmark of an hg repo; in git mode GITHUB_REF_NAME)",
+    )
     args = parser.parse_args(argv)
 
     try:
         checked, skipped, pruned = run_checkout(
-            args.versions, args.src, args.repo
+            args.versions, args.src, args.repo, args.matched
         )
     except ValueError as exc:
         log.error("versions-invalid", path=str(args.versions), error=str(exc))
         return 2
-    except (CheckoutError, ActiveBookmarkError) as exc:
+    except VcsError as exc:
         log.error("checkout-failed", error=str(exc))
         return 1
 

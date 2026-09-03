@@ -1,0 +1,50 @@
+name: docs
+
+# The GitHub mirror build of the platform documentation: build the
+# manual via make in doc/ and upload the HTML as an artifact. No
+# deploy job -- publishing happens elsewhere.
+#
+# The checkout carries FULL history: the doc tools resolve the
+# platform-versions.toml revs as mirror branches
+# (refs/remotes/origin/<branch>), and a shallow clone only fetches
+# the built branch. In git mode the matched ref is GITHUB_REF_NAME
+# (the branch being built); --matched would win over it.
+
+on:
+  push:
+    paths:
+      - "doc/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build platform documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the monorepo with all mirror branches
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      # Exactly pinned: moving major tags are gone from v8 on, and a
+      # floating tag would silently change the toolchain. The cache is
+      # keyed on uv.lock (the action's default dependency glob).
+      - name: Install pinned uv with lockfile cache
+        uses: astral-sh/setup-uv@8.0.0
+        with:
+          enable-cache: true
+
+      - name: Build the documentation (switcher, snapshots, HTML)
+        working-directory: doc
+        run: make
+
+      - name: Upload the HTML build
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-html
+          path: doc/_build

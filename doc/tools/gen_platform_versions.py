@@ -3,11 +3,14 @@
 Two inputs, both on disk and strictly local:
 
 * ``platform-versions.toml`` -- the declared version set. The entry
-  whose ``rev`` is the repo's ACTIVE bookmark (:func:`match_active`)
+  whose ``rev`` is MATCHED (see :func:`tools.vcs_backend.matched_entry`)
   is the LOCAL manual: it builds at ``/`` and is never checked out,
   whatever its category. Every other entry -- including a non-matched
   ``[stable]`` -- is placed as a snapshot under ``src/<ver>/`` by
   ``tools/checkout_versioned_docs.py`` (each builds at ``/<ver>/``).
+  Matching is backend-dependent: an hg repo contributes its ACTIVE
+  bookmark, a git mirror clone the ``--matched`` flag or
+  ``GITHUB_REF_NAME``.
 
 * the file trees -- the local ``src/`` tree plus every ``src/<ver>/``
   snapshot. A page is identified by its URL-shaped page-id
@@ -43,7 +46,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
 import sys
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -51,6 +53,8 @@ from pathlib import Path
 
 import structlog
 import tomllib
+
+from tools.vcs_backend import VcsError, matched_entry
 
 log = structlog.get_logger()
 
@@ -74,8 +78,9 @@ def is_version_dir(name: str) -> bool:
 class VersionEntry:
     """One declared version: where it comes from and how it is served.
 
-    ``rev`` is the hg bookmark ``checkout_versioned_docs`` resolves --
-    purely informational here, this tool never touches the repository.
+    ``rev`` is the hg bookmark or git mirror branch
+    ``checkout_versioned_docs`` resolves -- purely informational here,
+    this tool never touches the repository.
     """
 
     ver: str
@@ -154,61 +159,6 @@ def load_versions(path: Path) -> VersionSet:
     )
 
 
-class ActiveBookmarkError(RuntimeError):
-    """The repo's active bookmark cannot identify the local manual."""
-
-
-def active_bookmark(repo: Path) -> str:
-    """The repo's ACTIVE bookmark name (``''`` when none is active).
-
-    ``hg log -r . -T {activebookmark}`` reads exactly what ``hg su``
-    (summary) reports as active: the bookmark the working dir sits on
-    AND advances on commit. Updating to a bare rev deactivates it.
-    """
-    proc = subprocess.run(
-        ["hg", "log", "-r", ".", "-T", "{activebookmark}"],
-        cwd=repo,
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if proc.returncode != 0:
-        msg = (
-            f"cannot read the active bookmark of {repo} ({proc.stderr.strip()})"
-            " -- is it an hg working directory?"
-        )
-        raise ActiveBookmarkError(msg)
-    return proc.stdout.strip()
-
-
-def match_active(versions: VersionSet, repo: Path) -> VersionEntry:
-    """The declared entry whose ``rev`` is the repo's ACTIVE bookmark.
-
-    That entry IS the local manual: it builds at ``/`` and is never
-    checked out, whatever its TOML category. No active bookmark, or one
-    unknown to the TOML, is an error -- there is NO fallback to any
-    category: guessing would silently build the wrong manual at ``/``.
-    """
-    bookmark = active_bookmark(repo)
-    if not bookmark:
-        msg = (
-            f"no active bookmark in {repo} -- the ACTIVE bookmark selects "
-            "the local manual: hg up <bookmark> to activate one (verify "
-            "with hg su); there is no fallback"
-        )
-        raise ActiveBookmarkError(msg)
-    for entry in versions.entries():
-        if entry.rev == bookmark:
-            return entry
-    known = ", ".join(entry.rev for entry in versions.entries())
-    msg = (
-        f"active bookmark {bookmark!r} matches no rev in "
-        f"platform-versions.toml (known revs: {known}) -- hg up one of "
-        "them or declare the rev"
-    )
-    raise ActiveBookmarkError(msg)
-
-
 def page_id(rel: Path) -> str:
     """URL-shaped page-id for a tree-relative ``*.md`` path.
 
@@ -245,12 +195,12 @@ def build_payload(
 ) -> dict:
     """Build the master-centric switcher payload.
 
-    ``matched`` (the entry whose rev is the ACTIVE bookmark, see
-    :func:`match_active`) is the MASTER manual: it builds at ``/``
-    and anchors the payload -- the local ``src/`` tree IS its
-    inventory. Every OTHER declared entry -- including a non-matched
-    ``[stable]`` -- is a snapshot at ``/<ver>/`` whose inventory is
-    scanned from ``src/<ver>/``.
+    ``matched`` (the entry selected by the VCS seam, see
+    :func:`tools.vcs_backend.matched_entry`) is the MASTER manual: it
+    builds at ``/`` and anchors the payload -- the local ``src/`` tree
+    IS its inventory. Every OTHER declared entry -- including a
+    non-matched ``[stable]`` -- is a snapshot at ``/<ver>/`` whose
+    inventory is scanned from ``src/<ver>/``.
 
     Shape (all keys deterministically sorted, see the module
     docstring)::
@@ -388,7 +338,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     """CLI entry: ``python -m tools.gen_platform_versions``.
 
     Exit codes: ``0`` (payload written, or already up to date), ``1``
-    (unreadable src/, or no/unknown active bookmark), ``2`` (invalid
+    (unreadable src/, or an unresolved matched ref), ``2`` (invalid
     platform-versions.toml).
     """
     _configure_logging()
@@ -401,6 +351,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     parser.add_argument("--src", type=Path, default=DOC_ROOT / "src")
     parser.add_argument("--repo", type=Path, default=REPO_ROOT)
+    parser.add_argument(
+        "--matched",
+        metavar="REV",
+        default=None,
+        help="Rev whose entry IS the manual at '/' (default: the ACTIVE "
+        "bookmark of an hg repo; in git mode GITHUB_REF_NAME)",
+    )
     parser.add_argument(
         "--out",
         type=Path,
@@ -419,20 +376,14 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 1
 
     try:
-        matched = match_active(versions, args.repo)
-    except ActiveBookmarkError as exc:
+        matched = matched_entry(versions, args.repo, args.matched)
+    except VcsError as exc:
         log.error(
-            "active-bookmark-unmatched",
+            "matched-ref-unresolved",
             repo=str(args.repo),
             error=str(exc),
         )
         return 1
-    log.info(
-        "active-bookmark-matched",
-        ver=matched.ver,
-        rev=matched.rev,
-        status=matched.status,
-    )
 
     payload = build_payload(versions, matched, args.src)
     rendered = render_js(payload)

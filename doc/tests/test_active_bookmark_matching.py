@@ -1,13 +1,14 @@
 """Tests for the ACTIVE-bookmark local-manual selection.
 
-The contract suites drive both tools e2e; these tests pin the resolver
-unit itself and the partial-sunset-move scenario with a setup whose
-bookmark state is coherent (the contract's own
-``test_partial_move_excludes_stray_files`` leaves the repo WITHOUT an
-active bookmark -- ``hg up -r 1`` deactivates it and nothing re-activates
-one -- which ``test_no_active_bookmark_fails_loudly`` defines as a
-hard-fail state; here the bookmark is re-activated after the partial
-move, so the namespaced-export behavior itself is what is under test).
+The contract suites drive both tools e2e; these tests pin the hg
+backend's native resolver unit (:mod:`tools.vcs_backend`) and the
+partial-sunset-move scenario with a setup whose bookmark state is
+coherent (the contract's own ``test_partial_move_excludes_stray_files``
+leaves the repo WITHOUT an active bookmark -- ``hg up -r 1`` deactivates
+it and nothing re-activates one -- which
+``test_no_active_bookmark_fails_loudly`` defines as a hard-fail state;
+here the bookmark is re-activated after the partial move, so the
+namespaced-export behavior itself is what is under test).
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from pathlib import Path
 import pytest
 from tools import checkout_versioned_docs as cot
 from tools import gen_platform_versions as gpv
+from tools import vcs_backend as vcs
 
 TOML = """\
 [stable]
@@ -94,7 +96,7 @@ def load(
 
 def test_match_active_returns_the_bookmarked_entry(repo: Path) -> None:
     """Active [stable] bookmark matches the stable entry."""
-    matched = gpv.match_active(load(repo), repo)
+    matched = vcs.match_active(load(repo), repo)
     assert (matched.ver, matched.status) == ("26.05", "stable")
 
 
@@ -103,15 +105,15 @@ def test_match_active_follows_the_active_bookmark_not_the_category(
 ) -> None:
     """Active prerelease bookmark matches the prerelease entry."""
     hg(repo, "up", "fc-26.11-dev")
-    matched = gpv.match_active(load(repo), repo)
+    matched = vcs.match_active(load(repo), repo)
     assert (matched.ver, matched.status) == ("26.11", "prerelease")
 
 
 def test_match_active_without_active_bookmark_fails(repo: Path) -> None:
     """Bare working copy: remediation names hg su, no fallback."""
     hg(repo, "up", "-r", "1")
-    with pytest.raises(gpv.ActiveBookmarkError) as excinfo:
-        gpv.match_active(load(repo), repo)
+    with pytest.raises(vcs.ActiveBookmarkError) as excinfo:
+        vcs.match_active(load(repo), repo)
     assert "no active bookmark" in str(excinfo.value)
     assert "hg su" in str(excinfo.value)
 
@@ -120,8 +122,8 @@ def test_match_active_with_unknown_bookmark_names_all_revs(repo: Path) -> None:
     """A bookmark no TOML rev carries: error lists it and the known revs."""
     hg(repo, "bookmark", "-r", "2", "feature-x")
     hg(repo, "up", "feature-x")
-    with pytest.raises(gpv.ActiveBookmarkError) as excinfo:
-        gpv.match_active(load(repo), repo)
+    with pytest.raises(vcs.ActiveBookmarkError) as excinfo:
+        vcs.match_active(load(repo), repo)
     msg = str(excinfo.value)
     assert "feature-x" in msg
     for rev in ("fc-26.05-production", "fc-26.11-dev", "fc-25.11-production"):
@@ -132,8 +134,8 @@ def test_active_bookmark_outside_a_repo_fails(tmp_path: Path) -> None:
     """A directory without .hg cannot answer: loud error, no guessing."""
     empty = tmp_path / "not-a-repo"
     empty.mkdir()
-    with pytest.raises(gpv.ActiveBookmarkError):
-        gpv.active_bookmark(empty)
+    with pytest.raises(vcs.ActiveBookmarkError):
+        vcs.active_bookmark(empty)
 
 
 def test_partial_move_excludes_stray_files_with_active_bookmark(
