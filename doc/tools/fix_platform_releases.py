@@ -47,6 +47,21 @@ from rich.table import Table
 LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]*platform-releases[^)]*)\)")
 ANCHOR_RE = re.compile(r"\{\s*#([A-Za-z0-9_-]+)")
 
+# Sunsetting banner lines link to the stable docs via a template placeholder.
+# They are not version-relative links — never rewrite them.
+BANNER_MARKER = "sunsetting version of the platform documentation"
+
+
+def on_banner_line(match: re.Match[str]) -> bool:
+    """Return True if the regex match sits on a sunsetting banner line."""
+    text = match.string
+    line_start = text.rfind("\n", 0, match.start()) + 1
+    line_end = text.find("\n", match.end())
+    if line_end == -1:
+        line_end = len(text)
+    return BANNER_MARKER in text[line_start:line_end]
+
+
 KNOWN_RENAMES: dict[str, str] = {
     "upgrade.md": "upgrades-whats-new.md",
     "user_profile.md": "user-profile.md",
@@ -166,16 +181,25 @@ def resolve_target(
     return None
 
 
-def compute_new_url(source: Path, target: Path, anchor: str | None) -> str:
+def compute_new_url(
+    source: Path, target: Path, anchor: str | None, old_url: str
+) -> str:
     if source.resolve() == target.resolve():
-        return f"#{anchor}" if anchor else ""
+        if anchor:
+            return f"#{anchor}"
+        # self-link without anchor: an empty href would be invalid — keep
+        # the original URL so the link stays untouched
+        log.debug(
+            "self-link-kept",
+            _replace_msg="Self-link without anchor kept as-is in {source}",
+            source=str(source),
+            old_url=old_url,
+        )
+        return old_url
     rel = os.path.relpath(target, start=source.parent)
     rel = rel.replace(os.sep, "/")
     if anchor:
         return f"{rel}#{anchor}"
-    # same-file without anchor would produce [label]() -> invalid, keep as rel path
-    if not anchor and rel == "":
-        return target.name
     return rel
 
 
@@ -186,7 +210,11 @@ def process_file(
     anchor_index: dict[str, Path],
     file_anchors: dict[Path, set[str]],
 ) -> tuple[int, list[tuple[str, str, str]], list[str], str]:
-    """Return (fix_count, changes, errors). changes is list of (old_url, new_url, anchor_ok)."""
+    """Return (fix_count, changes, errors, new_text).
+
+    changes is a list of (old_url, new_url, target_name).
+    Sunsetting banner lines are skipped entirely.
+    """
     try:
         text = source.read_text(encoding="utf-8")
     except OSError:
@@ -198,6 +226,14 @@ def process_file(
     new_text = text
 
     for m in LINK_RE.finditer(text):
+        if on_banner_line(m):
+            log.info(
+                "banner-skipped",
+                _replace_msg="Skipping sunsetting banner link in {source}: {url}",
+                source=str(source),
+                url=m.group(2),
+            )
+            continue
         url = m.group(2)
         # split anchor
         if "#" in url:
@@ -247,7 +283,7 @@ def process_file(
                 )
                 errors.append(msg)
                 # still fix path, anchor verification is separate
-        new_url = compute_new_url(source, target, anchor)
+        new_url = compute_new_url(source, target, anchor, url)
         old_url = url
         if new_url == old_url:
             continue
@@ -260,6 +296,8 @@ def process_file(
         # Build new_text by replacing each old_url occurrence that was matched
         # Use re.sub with function to avoid double-replace issues
         def repl(m: re.Match[str]) -> str:
+            if on_banner_line(m):
+                return m.group(0)
             label = m.group(1)
             url = m.group(2)
             # find corresponding change for this url instance
@@ -277,7 +315,7 @@ def process_file(
             )
             if target2 is None:
                 return m.group(0)
-            new_url2 = compute_new_url(source, target2, anchor2)
+            new_url2 = compute_new_url(source, target2, anchor2, url)
             if new_url2 == url:
                 return m.group(0)
             return f"[{label}]({new_url2})"
