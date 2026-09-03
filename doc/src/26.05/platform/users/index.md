@@ -11,5 +11,11 @@ software components (roles).
 
 ## Specific software components (roles) { #nixos-components }
 
+## Permissions { #permissions }
+
+Permissions control user access to VMs and services. They are managed centrally via
+[my.flyingcircus.io](https://my.flyingcircus.io) and provisioned to all relevant
+systems, including proper removal of access rights. See also the permission table
+in the platform documentation.
 
 [nixos]: https://nixos.org
