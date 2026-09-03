@@ -124,7 +124,7 @@ provider.
 
 **Purpose: prevent the unauthorized input of personal data and the unauthorized inspection, modification or deletion of stored personal data**
 
-All data in our [storage clusters](../infrastructure/storage.md#infrastructure-storage) is stored encrypted.
+All data in our [storage clusters](../infrastructure/block-storage.md#infrastructure-storage) is stored encrypted.
 This includes the *Virtual Disk Block Storage*, our *S3-compatible Object
 Storage*, and [all automated backups](../infrastructure/backup.md#backup). There are technical and
 organisational measures in place to protect the relevant keys.
