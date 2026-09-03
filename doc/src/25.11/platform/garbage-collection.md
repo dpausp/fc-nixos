@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../../platform-releases/fc-26.05-production/fc_collect_garbage_userscan.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the stable version]({{ stable_url }}) for optimized support.
 
 # Garbage collection & fc-userscan { #nixos-gc-fc-userscan }
 

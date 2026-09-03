@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version]() for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the stable version]({{ stable_url }}) for optimized support.
 
 # Cron { #nixos-cron }
 

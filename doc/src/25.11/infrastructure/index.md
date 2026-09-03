@@ -4,7 +4,7 @@ search:
 ---
 
 !!! warning
-    This is a sunsetting version of the platform documentation. Go to [the current version](../index.md) for optimized support.
+    This is a sunsetting version of the platform documentation. Go to [the stable version]({{ stable_url }}) for optimized support.
 
 # Flying Circus platform 25.11 { #nixos-platform-index }
 
