@@ -1,0 +1,44 @@
+2026-09-04 08:55:28 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/zensical.log verbose=False
+2026-09-04 08:55:28 [DEBUG] ensure_pyproject:2463 pyproject-has-project-section: path=/Users/ts/vcs/fc-nixos/doc/pyproject.toml
+2026-09-04 08:55:28 [DEBUG] ensure_lock_file:2494 lockfile-found: path=/Users/ts/vcs/fc-nixos/doc/uv.lock
+2026-09-04 08:55:28 [DEBUG] _get_uv_bin:907 uv-discovery-start: appenv_dir=/Users/ts/vcs/fc-nixos/doc/.appenv
+2026-09-04 08:55:28 [DEBUG] _try_uv_from_path:926 uv-path-probe: found=/Users/ts/.local/bin/uv
+2026-09-04 08:55:28 [DEBUG] get_uv_version:884 uv-version-raw: output=uv 0.12.7 (61291a8ca 2026-08-27 aarch64-apple-darwin)
+2026-09-04 08:55:28 [DEBUG] _try_uv_from_path:930 uv-version-check: version=0.12.7 valid=True source=path
+2026-09-04 08:55:28 [DEBUG] ensure_uv:2440 ensure-uv-bin: path=/Users/ts/.local/bin/uv
+2026-09-04 08:55:28 [DEBUG] get_uv_version:884 uv-version-raw: output=uv 0.12.7 (61291a8ca 2026-08-27 aarch64-apple-darwin)
+2026-09-04 08:55:28 [DEBUG] ensure_uv:2443 ensure-uv-version: version=0.12.7
+2026-09-04 08:55:28 [DEBUG] _prepare_venv:2365 prepare-venv-context: base=/Users/ts/vcs/fc-nixos/doc venv=/Users/ts/vcs/fc-nixos/doc/.appenv/venv python=/Users/ts/.local/share/uv/python/cpython-3.15.0b2-macos-aarch64-none/bin/python3.15 dev_mode=False
+2026-09-04 08:55:28 [DEBUG] cmd:858 uv-cmd-started: args=/Users/ts/.local/bin/uv lock --check
+2026-09-04 08:55:28 [DEBUG] cmd:860 uv-cmd-output: output=Resolved 22 packages in 4ms
+
+2026-09-04 08:55:28 [DEBUG] _uv_sync:2274 uv-sync-extras: extras=[]
+2026-09-04 08:55:28 [DEBUG] cmd:858 uv-cmd-started: args=/Users/ts/.local/bin/uv sync --no-dev --frozen
+2026-09-04 08:55:28 [DEBUG] cmd:860 uv-cmd-output: output=Checked 16 packages in 0.54ms
+
+2026-09-04 08:55:28 [DEBUG] _prepare_venv:2385 venv-python: path=/Users/ts/vcs/fc-nixos/doc/.appenv/venv/bin/python realpath=/Users/ts/.local/share/uv/python/cpython-3.15.0b2-macos-aarch64-none/bin/python3.15
+2026-09-04 08:55:28 [DEBUG] _prepare_venv:2391 venv-python-version: version=Python 3.15.0b2
+2026-09-04 08:55:28 [DEBUG] run:1265 run-chdir: target=/Users/ts/vcs/fc-nixos/doc
+2026-09-04 08:55:28 [INFO] run:1269 exec-command: binary=/Users/ts/vcs/fc-nixos/doc/.appenv/venv/bin/zensical argv=['/Users/ts/vcs/fc-nixos/doc/.appenv/venv/bin/zensical', 'build']
+2026-09-04 08:56:38 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/zensical.log verbose=False
+2026-09-04 08:56:38 [DEBUG] ensure_pyproject:2463 pyproject-has-project-section: path=/Users/ts/vcs/fc-nixos/doc/pyproject.toml
+2026-09-04 08:56:38 [DEBUG] ensure_lock_file:2494 lockfile-found: path=/Users/ts/vcs/fc-nixos/doc/uv.lock
+2026-09-04 08:56:38 [DEBUG] _get_uv_bin:907 uv-discovery-start: appenv_dir=/Users/ts/vcs/fc-nixos/doc/.appenv
+2026-09-04 08:56:38 [DEBUG] _try_uv_from_path:926 uv-path-probe: found=/Users/ts/.local/bin/uv
+2026-09-04 08:56:38 [DEBUG] get_uv_version:884 uv-version-raw: output=uv 0.12.7 (61291a8ca 2026-08-27 aarch64-apple-darwin)
+2026-09-04 08:56:38 [DEBUG] _try_uv_from_path:930 uv-version-check: version=0.12.7 valid=True source=path
+2026-09-04 08:56:38 [DEBUG] ensure_uv:2440 ensure-uv-bin: path=/Users/ts/.local/bin/uv
+2026-09-04 08:56:38 [DEBUG] get_uv_version:884 uv-version-raw: output=uv 0.12.7 (61291a8ca 2026-08-27 aarch64-apple-darwin)
+2026-09-04 08:56:38 [DEBUG] ensure_uv:2443 ensure-uv-version: version=0.12.7
+2026-09-04 08:56:38 [DEBUG] _prepare_venv:2365 prepare-venv-context: base=/Users/ts/vcs/fc-nixos/doc venv=/Users/ts/vcs/fc-nixos/doc/.appenv/venv python=/Users/ts/.local/share/uv/python/cpython-3.15.0b2-macos-aarch64-none/bin/python3.15 dev_mode=False
+2026-09-04 08:56:38 [DEBUG] cmd:858 uv-cmd-started: args=/Users/ts/.local/bin/uv lock --check
+2026-09-04 08:56:39 [DEBUG] cmd:860 uv-cmd-output: output=Resolved 22 packages in 19ms
+
+2026-09-04 08:56:39 [DEBUG] _uv_sync:2274 uv-sync-extras: extras=[]
+2026-09-04 08:56:39 [DEBUG] cmd:858 uv-cmd-started: args=/Users/ts/.local/bin/uv sync --no-dev --frozen
+2026-09-04 08:56:39 [DEBUG] cmd:860 uv-cmd-output: output=Checked 16 packages in 6ms
+
+2026-09-04 08:56:39 [DEBUG] _prepare_venv:2385 venv-python: path=/Users/ts/vcs/fc-nixos/doc/.appenv/venv/bin/python realpath=/Users/ts/.local/share/uv/python/cpython-3.15.0b2-macos-aarch64-none/bin/python3.15
+2026-09-04 08:56:39 [DEBUG] _prepare_venv:2391 venv-python-version: version=Python 3.15.0b2
+2026-09-04 08:56:39 [DEBUG] run:1265 run-chdir: target=/Users/ts/vcs/fc-nixos/doc
+2026-09-04 08:56:39 [INFO] run:1269 exec-command: binary=/Users/ts/vcs/fc-nixos/doc/.appenv/venv/bin/zensical argv=['/Users/ts/vcs/fc-nixos/doc/.appenv/venv/bin/zensical', 'serve']

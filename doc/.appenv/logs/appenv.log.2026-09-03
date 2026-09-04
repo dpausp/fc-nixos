@@ -1,0 +1,36 @@
+2026-09-03 21:32:53 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 21:32:53 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x1067f46e0>>, _passthrough=True)
+2026-09-03 21:32:53 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.checkout_versioned_docs']
+2026-09-03 21:32:54 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 21:32:54 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x10abcc6e0>>, _passthrough=True)
+2026-09-03 21:32:54 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.gen_platform_versions']
+2026-09-03 21:38:00 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 21:38:00 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x10a85c6e0>>, _passthrough=True)
+2026-09-03 21:38:00 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.checkout_versioned_docs']
+2026-09-03 21:38:02 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 21:38:02 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x108a3c6e0>>, _passthrough=True)
+2026-09-03 21:38:02 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.gen_platform_versions']
+2026-09-03 22:24:37 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 22:24:37 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x10a2d86e0>>, _passthrough=True)
+2026-09-03 22:24:37 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.checkout_versioned_docs']
+2026-09-03 22:24:39 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 22:24:39 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x10af386e0>>, _passthrough=True)
+2026-09-03 22:24:39 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.gen_platform_versions']
+2026-09-03 22:28:51 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 22:28:51 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x10a8986e0>>, _passthrough=True)
+2026-09-03 22:28:51 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.checkout_versioned_docs']
+2026-09-03 22:28:52 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 22:28:52 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x10a4b46e0>>, _passthrough=True)
+2026-09-03 22:28:52 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.gen_platform_versions']
+2026-09-03 22:29:31 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 22:29:31 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x108e586e0>>, _passthrough=True)
+2026-09-03 22:29:31 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.checkout_versioned_docs']
+2026-09-03 22:29:32 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 22:29:32 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x1088dc6e0>>, _passthrough=True)
+2026-09-03 22:29:32 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.gen_platform_versions']
+2026-09-03 23:22:23 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 23:22:23 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x10aaf86e0>>, _passthrough=True)
+2026-09-03 23:22:23 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.checkout_versioned_docs']
+2026-09-03 23:22:24 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-03 23:22:24 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x1070ac6e0>>, _passthrough=True)
+2026-09-03 23:22:24 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.gen_platform_versions']

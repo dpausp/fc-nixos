@@ -1,0 +1,6 @@
+2026-09-04 08:55:26 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-04 08:55:26 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x1067d06e0>>, _passthrough=True)
+2026-09-04 08:55:26 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.checkout_versioned_docs']
+2026-09-04 08:55:28 [DEBUG] setup_logging:2849 logging-configured: log_file=/Users/ts/vcs/fc-nixos/doc/.appenv/logs/appenv.log verbose=False
+2026-09-04 08:55:28 [DEBUG] meta:1433 parsed-args: args=Namespace(func=<bound method AppEnv.python of <__main__.AppEnv object at 0x1090606e0>>, _passthrough=True)
+2026-09-04 08:55:28 [DEBUG] meta:1434 parsed-args-remaining: args=['-m', 'tools.gen_platform_versions']
