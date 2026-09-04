@@ -30,10 +30,11 @@ stable's public status is stable, never sunsetting). Otherwise
 prerelease snapshots stay verbatim: they ARE the integration line.
 
 A manifest (``src/.checkout-manifest.json``) records the exported ref
-(node hash or mirror-branch sha) per version plus this tool's sha256. A
+(node hash or mirror-branch sha) per version plus the sha256 of this
+tool and the fix table (:mod:`tools.snapshot_content_fixes`). A
 version is skipped when BOTH are unchanged -- re-running never clobbers
-the placed tree, and editing this tool re-places every version
-(banner/frontmatter logic may have changed). Undeclared
+the placed tree, and editing this tool OR the fix table re-places every
+version (banner/frontmatter/fix-table logic may have changed). Undeclared
 ``src/<NN.NN>/`` dirs are pruned.
 
 Regenerate via ``make checkout-versioned-docs`` (then
@@ -54,6 +55,7 @@ from pathlib import Path
 
 import structlog
 
+from tools import snapshot_content_fixes
 from tools.gen_platform_versions import (
     DOC_ROOT,
     REPO_ROOT,
@@ -105,9 +107,17 @@ STATUS_CLAUSE = {
 }
 
 
+def fingerprint_of(*files: Path) -> str:
+    """sha256 over the concatenated bytes of *files* (stable order)."""
+    digest = hashlib.sha256()
+    for file in files:
+        digest.update(file.read_bytes())
+    return digest.hexdigest()
+
+
 def tool_fingerprint() -> str:
-    """sha256 of this file -- forces re-placement when the tool changes."""
-    return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    """sha256 of this module AND the fix table -- editing either re-places."""
+    return fingerprint_of(Path(__file__), Path(snapshot_content_fixes.__file__))
 
 
 def load_manifest(path: Path) -> dict:

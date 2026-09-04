@@ -508,3 +508,27 @@ def test_old_stable_snapshot_gets_banner_and_exclude(
     assert "exclude: true" in text.split("!!! warning", 1)[0]
     assert "[26.11 manual]" in text
     assert "is in sunsetting" not in text
+
+
+def test_fingerprint_of_hashes_every_listed_file(tmp_path: Path) -> None:
+    """The fingerprint flips when ANY listed file's content changes."""
+    a = tmp_path / "a.py"
+    b = tmp_path / "b.py"
+    a.write_text("x = 1\n")
+    b.write_text("y = 2\n")
+    base = cot.fingerprint_of(a, b)
+    assert base == cot.fingerprint_of(a, b)
+
+    b.write_text("y = 3\n")
+
+    assert cot.fingerprint_of(a, b) != base
+
+
+def test_tool_fingerprint_covers_the_fix_table() -> None:
+    """Editing the fix table must re-place snapshots: its source file is
+    part of the fingerprint (this pins the contract)."""
+    from tools import snapshot_content_fixes as scf
+
+    assert cot.tool_fingerprint() == cot.fingerprint_of(
+        Path(cot.__file__), Path(scf.__file__)
+    )

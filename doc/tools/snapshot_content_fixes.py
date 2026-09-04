@@ -1,11 +1,17 @@
 """Content fixes applied to placed version snapshots.
 
-The new-docs version branches carry pre-fix content: dead split-era
-link targets (``platform-releases/<branch>/...`` and
-``../platform/<branch>/...``) plus old fetch-era sunsetting banners
-with dead links. This table is the exact set of fixes already applied
-to the integration line, applied to every placed snapshot so builds
-stay link-clean without backporting first.
+The version branches carry pre-fix content: dead split-era link
+targets (``platform-releases/<branch>/...`` and
+``../platform/<branch>/...``), pre-rename infrastructure targets
+(``storage.md``), and old fetch-era sunsetting banners with dead
+links. This table mirrors the fixes already applied to the
+integration line and the version branches, so EVERY placed snapshot
+becomes link-clean without backporting first -- adding a pair is the
+supported way to temporarily fix unfixed branch content.
+
+:data:`FIXES` pairs apply to every page; :data:`FILE_FIXES` pairs are
+scoped to one page id (relative to the snapshot root) for dead URLs
+that need a different replacement per source location.
 
 BACKPORT DEBT: as fixes land on the version branches the table
 shrinks -- when every entry matches nothing, this module dies.
@@ -32,12 +38,112 @@ FIXES: list[tuple[str, str]] = [
         "user-profile.md#nixos-user-package-management",
     ),
     (
-        "../../platform-releases/fc-26.05-production/local.md#nixos-local",
-        "local.md#nixos-local",
-    ),
-    (
         "../../platform-releases/fc-26.05-production/systemd.md#nixos-systemd-app-service-example",
         "#nixos-systemd-app-service-example",
+    ),
+    # 26.05-era platform-releases remnants (folded from the branch link
+    # fixes). Longer anchors first: the plain mysql pair would otherwise
+    # mangle ...#nixos-mysql-upgrade, the performance pair must run
+    # before its shorter prefix below.
+    (
+        "../../platform-releases/fc-26.05-production/mysql.md#nixos-mysql-upgrade",
+        "../components/mysql.md#nixos-mysql-upgrade",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/mysql.md#nixos-mysql",
+        "mysql.md#nixos-mysql",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/postgresql.md#nixos-postgresql-server",
+        "postgresql.md#nixos-postgresql-server",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/mailserver.md#nixos-mailserver-basic-setup",
+        "#nixos-mailserver-basic-setup",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/mailserver.md#mail-into-backends",
+        "#mail-into-backends",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/mailserver.md#nixos-mailserver",
+        "mailserver.md#nixos-mailserver",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/devhost.md#nixos-devhost",
+        "devhost.md#nixos-devhost",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/statshost.md#nixos-statshost",
+        "statshost.md#nixos-statshost",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/local.md#nixos-custom-modules",
+        "../platform/local.md#nixos-custom-modules",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/local.md#nixos-local",
+        "../platform/local.md#nixos-local",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/slurm.md#nixos-slurm-config-reference",
+        "#nixos-slurm-config-reference",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/slurm.md#nixos-fc-slurm",
+        "#nixos-fc-slurm",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/slurm.md#nixos-slurm-upgrade",
+        "../components/slurm.md#nixos-slurm-upgrade",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/webproxy.md#nixos-webgateway",
+        "../components/webproxy.md#nixos-webgateway",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/kubernetes.md#nixos-k3s-ipv6",
+        "../components/kubernetes.md#nixos-k3s-ipv6",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/kubernetes.md#nixos-k3s-update-versions",
+        "../components/kubernetes.md#nixos-k3s-update-versions",
+    ),
+    (
+        "See [nixos-webgateway](../../platform-releases/fc-26.05-production/webgateway.md#nixos-webgateway)",
+        "See [nixos-webgateway](webgateway.md#nixos-webgateway)",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-general",
+        "#nixos-upgrade-general",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-breaking",
+        "#nixos-upgrade-breaking",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-percona",
+        "#nixos-upgrade-percona",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-mail",
+        "#nixos-upgrade-mail",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-opensearch",
+        "#nixos-upgrade-opensearch",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-slurm",
+        "#nixos-upgrade-slurm",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-webproxy",
+        "#nixos-upgrade-webproxy",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-k3s",
+        "#nixos-upgrade-k3s",
     ),
     # split-era targets under ../platform/<branch>/ (components/ pages)
     (
@@ -111,6 +217,16 @@ FIXES: list[tuple[str, str]] = [
         "../../infrastructure/getting-started/index.md#firststeps",
     ),
     ("../reference/users/index.md", "../platform/users/index.md"),
+    # pre-rename infrastructure targets (storage.md -> block-storage.md);
+    # the longer performance anchor must run before its shorter prefix
+    (
+        "../../infrastructure/storage.md#infrastructure-storage-performance",
+        "../../infrastructure/block-storage.md#infrastructure-storage-performance",
+    ),
+    (
+        "../infrastructure/storage.md#infrastructure-storage",
+        "../infrastructure/block-storage.md#infrastructure-storage",
+    ),
     # mangled Sphinx/RST remnants
     (
         "`current NixOS platform documentation <nixos-platform-index>`",
@@ -129,6 +245,40 @@ FIXES: list[tuple[str, str]] = [
     ("`document <nixos-opensearch>`", "document"),
 ]
 
+# Path-dependent pairs: the SAME dead URL needs different replacements
+# per source location (components/lamp.md links its same-dir
+# webgateway.md, platform/deployment/lamp.md needs ../../components/).
+# Keys are page ids relative to the snapshot root; these run BEFORE the
+# global FIXES.
+FILE_FIXES: dict[str, list[tuple[str, str]]] = {
+    "components/lamp.md": [
+        (
+            "behind a [webgateway](../../platform-releases/fc-26.05-production/webgateway.md#nixos-webgateway)",
+            "behind a [webgateway](webgateway.md#nixos-webgateway)",
+        ),
+    ],
+    "platform/deployment/lamp.md": [
+        (
+            "behind a [webgateway](../../platform-releases/fc-26.05-production/webgateway.md#nixos-webgateway)",
+            "behind a [webgateway](../../components/webgateway.md#nixos-webgateway)",
+        ),
+    ],
+    # platform/ pages link their same-dir local.md; the components/
+    # occurrences of the same URL need ../platform/ (global FIXES)
+    "platform/monitoring.md": [
+        (
+            "../../platform-releases/fc-26.05-production/local.md#nixos-local",
+            "local.md#nixos-local",
+        ),
+    ],
+    "platform/systemd.md": [
+        (
+            "../../platform-releases/fc-26.05-production/local.md#nixos-local",
+            "local.md#nixos-local",
+        ),
+    ],
+}
+
 # Old fetch-era sunsetting banner (dead platform-releases link inside):
 # a bare '!!! warning' line followed by the indented one-liner.
 OLD_BANNER_RE = re.compile(
@@ -137,7 +287,7 @@ OLD_BANNER_RE = re.compile(
 
 
 def fix_text(text: str) -> tuple[str, int]:
-    """Apply all fixes to one page; return (new_text, fix_count)."""
+    """Apply all global fixes to one page; return (new_text, fix_count)."""
     count = 0
     for old, new in FIXES:
         if old in text:
@@ -147,12 +297,28 @@ def fix_text(text: str) -> tuple[str, int]:
     return text, count + banners
 
 
+def fix_page(page_id: str, text: str) -> tuple[str, int]:
+    """Apply file-scoped pairs (first), then :func:`fix_text`.
+
+    File-scoped pairs must run first: their old strings would otherwise
+    be consumed by an overlapping global pair with the wrong target.
+    """
+    count = 0
+    for old, new in FILE_FIXES.get(page_id, []):
+        if old in text:
+            text = text.replace(old, new)
+            count += 1
+    fixed, global_count = fix_text(text)
+    return fixed, count + global_count
+
+
 def fix_tree(tree: Path) -> int:
     """Fix every ``*.md`` below *tree* in place; return pages changed."""
     changed = 0
     for page in sorted(tree.rglob("*.md")):
+        page_id = page.relative_to(tree).as_posix()
         original = page.read_text(encoding="utf-8")
-        fixed, count = fix_text(original)
+        fixed, count = fix_page(page_id, original)
         if count:
             page.write_text(fixed, encoding="utf-8")
             changed += 1
