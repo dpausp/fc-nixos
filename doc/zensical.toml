@@ -12,8 +12,7 @@
 # linked in the sidebar (probed: zensical emits no warning for unlisted
 # pages): index.md (the manual index -- reached via the logo/site-title
 # links instead of a redundant nav entry), devopsguide-de.md (linked from
-# dead media, do not rename), platform/users/ssh-keygen.md (hidden
-# toctree entry in the Sphinx manual), and the German tree de/**
+# dead media, do not rename), and the German tree de/**
 # (translated pages for links in official German documents -- directories
 # mirror URLs: src/de/<path>.md serves at /de/<path>/; each page
 # cross-links its English twin; tests/test_de_pages.py pins ref
@@ -325,12 +324,27 @@ nav = [
   { "Platform" = [
       "platform/upgrades-whats-new.md",
       { "Philosophy" = "platform/philosophy.md" },
+      { "Users" = [
+          { "Generating SSH keys" = "platform/users/ssh-keygen.md" },
+          { "User Package Management" = "platform/user-profile.md" }
+      ] },
+      { "Operations & Security" = [
+          { "Base Environment" = "platform/base.md" },
+          { "Cron" = "platform/cron.md" },
+          { "Firewall" = "platform/firewall.md" },
+          { "Garbage Collection" = "platform/garbage-collection.md" },
+          { "Local Configuration" = "platform/local.md" },
+          { "Logrotate" = "platform/logrotate.md" },
+          { "Maintenance" = "platform/maintenance.md" },
+          { "Systemd" = "platform/systemd.md" }
+      ] },
+      { "Observability" = [
+          { "Logging" = "platform/logging.md" },
+          { "Monitoring" = "platform/monitoring.md" }
+      ] },
       { "Deployments" = [
           "platform/deployment/lamp.md",
           "platform/deployment/mongodb.md"
-      ] },
-      { "User Accounts" = [
-          "platform/users/ssh-keygen.md"
       ] },
       { "API" = [
           "platform/api/introduction.md",
@@ -338,18 +352,7 @@ nav = [
           "platform/api/methods.md",
           "platform/api/types.md",
           "platform/api/log.md"
-      ] },
-      { "Maintenance" = "platform/maintenance.md" },
-      { "Base Environment" = "platform/base.md" },
-      { "Systemd" = "platform/systemd.md" },
-      { "Cron" = "platform/cron.md" },
-      { "Local" = "platform/local.md" },
-      { "Logrotate" = "platform/logrotate.md" },
-      { "User Profile" = "platform/user-profile.md" },
-      { "logging" = "platform/logging.md" },
-      { "firewall" = "platform/firewall.md" },
-      { "monitoring" = "platform/monitoring.md" },
-      { "garbage collection" = "platform/garbage-collection.md" }
+      ] }
   ] },
   { "Components" = [
       { "Databases" = [
