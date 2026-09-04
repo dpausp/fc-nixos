@@ -21,10 +21,6 @@ The user profile can be customized by building an environment with `buildEnv`
 and installing it. Packages from arbitrary sources can be mixed and pinned
 to specific versions.
 
-```{highlight} default
-:linenothreshold: 3
-```
-
 Create a file like `myproject_env.nix` which specifies the packages to be installed:
 
 ```
