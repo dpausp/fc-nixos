@@ -30,6 +30,10 @@ dev = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "scaffold: scaffold-tier executable specification (xfail strict until implemented)",
+    "e2e: end-to-end proof against real local data (mirrors, fragments); skips loudly when the environment lacks them",
+]
 # make the tools/ package importable from tests (importlib import mode
 # prepends nothing to sys.path; tools/ is a doc/-root package)
 pythonpath = ["."]

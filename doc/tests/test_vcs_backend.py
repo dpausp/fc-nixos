@@ -215,6 +215,62 @@ def test_git_has_subtree_answers_directly(git_repo: Path) -> None:
     assert not backend.has_subtree(sha, "doc/src/26.05")
 
 
+def test_hg_read_file_returns_content_at_ref(hg_repo: Path) -> None:
+    """hg cat -r: the committed content at the resolved node."""
+    put(hg_repo / "doc" / "src", "page.md", "# committed\n")
+    hg(hg_repo, "addremove")
+    hg(hg_repo, "commit", "-m", "add page")
+    put(hg_repo / "doc" / "src", "page.md", "# dirty working copy\n")
+    backend = vcs.HgBackend(repo=hg_repo)
+    node = backend.resolve_ref("new-docs-master")
+    assert backend.read_file(node, "doc/src/page.md") == "# committed\n"
+
+
+def test_hg_read_file_missing_file_is_none(hg_repo: Path) -> None:
+    """A path absent at the ref maps to None (not an error)."""
+    backend = vcs.HgBackend(repo=hg_repo)
+    node = backend.resolve_ref("new-docs-master")
+    assert backend.read_file(node, "doc/src/never-existed.md") is None
+
+
+def test_hg_read_file_vcs_error_is_loud(hg_repo: Path) -> None:
+    """An unknown revision raises ReadFileError (a VcsError)."""
+    backend = vcs.HgBackend(repo=hg_repo)
+    with pytest.raises(vcs.ReadFileError) as excinfo:
+        backend.read_file("no-such-rev", "doc/src/index.md")
+    assert "no-such-rev" in str(excinfo.value)
+
+
+def test_git_read_file_returns_content_at_ref(
+    git_repo: Path, tmp_path: Path
+) -> None:
+    """git show <ref>:<path>: the committed content at the branch sha."""
+    git(git_repo, "checkout", "-q", "new-docs-master")
+    put(git_repo / "doc" / "src", "page.md", "# committed\n")
+    git(git_repo, "add", "doc")
+    git(git_repo, "commit", "-q", "-m", "add page")
+    git(git_repo, "push", "-q", "origin", "new-docs-master")
+    put(git_repo / "doc" / "src", "page.md", "# dirty working copy\n")
+    backend = vcs.GitBackend(repo=git_repo)
+    sha = backend.resolve_ref("new-docs-master")
+    assert backend.read_file(sha, "doc/src/page.md") == "# committed\n"
+
+
+def test_git_read_file_missing_file_is_none(git_repo: Path) -> None:
+    """A path absent at the ref maps to None (not an error)."""
+    backend = vcs.GitBackend(repo=git_repo)
+    sha = backend.resolve_ref("new-docs-master")
+    assert backend.read_file(sha, "doc/src/never-existed.md") is None
+
+
+def test_git_read_file_vcs_error_is_loud(git_repo: Path) -> None:
+    """An unknown revision raises ReadFileError (a VcsError)."""
+    backend = vcs.GitBackend(repo=git_repo)
+    with pytest.raises(vcs.ReadFileError) as excinfo:
+        backend.read_file("no-such-branch", "doc/src/index.md")
+    assert "no-such-branch" in str(excinfo.value)
+
+
 def test_hg_export_lands_pages_at_dest_top(
     hg_repo: Path, tmp_path: Path
 ) -> None:
@@ -365,6 +421,7 @@ def test_seam_errors_form_one_family() -> None:
         vcs.RefResolutionError,
         vcs.NamespacedTreeError,
         vcs.ExportError,
+        vcs.ReadFileError,
     ):
         assert issubclass(exc, vcs.VcsError)
 

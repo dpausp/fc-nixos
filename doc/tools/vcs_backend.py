@@ -1,9 +1,17 @@
 """Dual-VCS seam (hg | git) for the docs pipeline tools.
 
 Both repo-reading tools (:mod:`tools.gen_platform_versions`,
-:mod:`tools.checkout_versioned_docs`) speak ONE interface: the backend
+:mod:`tools.checkout_versioned_docs`,
+:mod:`tools.release_notes`) speak ONE interface: the backend
 auto-detected at the ``--repo`` path -- ``.hg/`` selects hg, ``.git/``
 selects git, neither fails loudly (:class:`NoVcsBackendError`).
+
+Beyond ref resolution, subtree checks and tree export, the seam reads
+single file CONTENT at a revision: :meth:`HgBackend.read_file`
+(``hg cat -r``) and :meth:`GitBackend.read_file` (``git show
+<ref>:<path>``) share one contract -- absent file maps to ``None``,
+any other VCS failure raises :class:`ReadFileError` (a
+:class:`VcsError`).
 
 hg is the LOCAL backend: the repo's ACTIVE bookmark selects the
 matched entry -- the manual built at ``/`` -- exactly as ``hg su``
@@ -72,6 +80,10 @@ class ExportError(VcsError):
     """A revision's docs tree could not be exported."""
 
 
+class ReadFileError(VcsError):
+    """A file could not be read at a revision (other than being absent)."""
+
+
 def _run(argv: list[str], cwd: Path) -> subprocess.CompletedProcess[str]:
     """One captured VCS subprocess -- never checked, never silent."""
     return subprocess.run(
@@ -114,6 +126,21 @@ class HgBackend:
         """
         proc = _run(["hg", "files", "-r", ref, f"path:{path}"], self.repo)
         return proc.returncode == 0 and bool(proc.stdout.strip())
+
+    def read_file(self, ref: str, path: str) -> str | None:
+        """Content of *path* at *ref*, or ``None`` when absent at *ref*.
+
+        ``hg cat -r`` -- absence is hg's ordinary ``no such file in
+        rev`` diagnostic and maps to ``None``; anything else (unknown
+        revision, ...) is a loud :class:`ReadFileError`.
+        """
+        proc = _run(["hg", "cat", "-r", ref, path], self.repo)
+        if proc.returncode == 0:
+            return proc.stdout
+        if "no such file in rev" in proc.stderr:
+            return None
+        msg = f"hg cat failed for {path} at {ref[:12]} ({proc.stderr.strip()})"
+        raise ReadFileError(msg)
 
     def export_tree(self, ref: str, subtree: Path, dest: Path) -> None:
         """Export *subtree* of *ref* so its files land directly in *dest*.
@@ -195,6 +222,24 @@ class GitBackend:
         """
         proc = _run(["git", "ls-tree", ref, "--", f"{path}/"], self.repo)
         return proc.returncode == 0 and bool(proc.stdout.strip())
+
+    def read_file(self, ref: str, path: str) -> str | None:
+        """Content of *path* at *ref*, or ``None`` when absent at *ref*.
+
+        ``git show <ref>:<path>`` -- absence is git's ``does not exist
+        in '<ref>'`` diagnostic and maps to ``None``; anything else
+        (unknown revision, ...) is a loud :class:`ReadFileError`. On a
+        blob-less partial clone a missing blob triggers a promisor
+        fetch (network) before this returns.
+        """
+        proc = _run(["git", "--no-pager", "show", f"{ref}:{path}"], self.repo)
+        if proc.returncode == 0:
+            return proc.stdout
+        stderr = proc.stderr.strip()
+        if "does not exist in" in stderr:
+            return None
+        msg = f"git show failed for {path} at {ref[:12]} ({stderr})"
+        raise ReadFileError(msg)
 
     def export_tree(self, ref: str, subtree: Path, dest: Path) -> None:
         """Export *subtree* of *ref* so its files land directly in *dest*.
