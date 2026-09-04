@@ -126,3 +126,97 @@ def test_fix_tree_applies_file_scoped_pairs(tmp_path: Path) -> None:
         "(../../components/webgateway.md#nixos-webgateway)"
         in (dep / "lamp.md").read_text()
     )
+
+
+PRE_FIX_USERS_INDEX = (
+    "# Flying Circus platform 25.11 { #nixos-platform-index }\n"
+    "\n"
+    "## General platform\n"
+    "\n"
+    "## Specific software components (roles) { #nixos-components }\n"
+    "\n"
+    "\n"
+    "[nixos]: https://nixos.org\n"
+)
+
+FIXED_USERS_INDEX = (
+    "# Flying Circus platform 25.11 { #nixos-platform-index }\n"
+    "\n"
+    "## General platform\n"
+    "\n"
+    "## Specific software components (roles) { #nixos-components }\n"
+    "\n"
+    "## Permissions { #permissions }\n"
+    "\n"
+    "Permissions control user access to VMs and services. "
+    "They are managed centrally via\n"
+    "[my.flyingcircus.io](https://my.flyingcircus.io) and provisioned to all relevant\n"
+    "systems, including proper removal of access rights. "
+    "See also the permission table\n"
+    "in the platform documentation.\n"
+    "\n"
+    "[nixos]: https://nixos.org\n"
+)
+
+
+def test_permissions_section_is_injected_where_missing() -> None:
+    """Pre-fix branch revisions lack the Permissions section that
+    security/data-protection.md's ``#permissions`` link needs -- the
+    injection pair backfills it so the anchor resolves."""
+    fixed, count = fix_page("platform/users/index.md", PRE_FIX_USERS_INDEX)
+
+    assert count == 1
+    assert fixed == FIXED_USERS_INDEX
+
+
+def test_permissions_section_is_not_injected_twice() -> None:
+    """Branch-fixed content already carries the section: the pre-fix
+    shape no longer matches, the page must pass through untouched."""
+    fixed, count = fix_page("platform/users/index.md", FIXED_USERS_INDEX)
+
+    assert count == 0
+    assert fixed == FIXED_USERS_INDEX
+
+
+def test_late_2605_pairs_slurm_upgrade_and_webproxy_anchor() -> None:
+    """The pre-link-fix 26.05 tree carries two more dead targets: the
+    slurm upgrade notes and the #nixos-webproxy anchor variant."""
+    slurm = (
+        "listed in the [upgrade notes]"
+        "(../../platform-releases/fc-26.05-production/upgrade.md#nixos-upgrade)."
+    )
+    upgrades = (
+        "read the [role documentation]"
+        "(../../platform-releases/fc-26.05-production/webproxy.md#nixos-webproxy)"
+    )
+
+    slurm_fixed, slurm_count = fix_page("components/slurm.md", slurm)
+    up_fixed, up_count = fix_page("platform/upgrades-whats-new.md", upgrades)
+
+    assert slurm_count == 1
+    assert (
+        "[upgrade notes](../platform/upgrades-whats-new.md#nixos-upgrade)"
+        in (slurm_fixed)
+    )
+    assert up_count == 1
+    assert "[role documentation](../components/webproxy.md#nixos-webproxy)" in (
+        up_fixed
+    )
+
+
+def test_2511_mailserver_prefix_pairs_do_not_mangle_each_other() -> None:
+    """The plain #nixos-mailserver pair must not eat
+    #nixos-mailserver-basic-setup (25.11-era URLs)."""
+    text = (
+        "See [basic setup]"
+        "(../../platform-releases/fc-25.11-production/mailserver.md"
+        "#nixos-mailserver-basic-setup) and [the role]"
+        "(../../platform-releases/fc-25.11-production/mailserver.md#nixos-mailserver)."
+    )
+
+    fixed, count = fix_text(text)
+
+    assert count == 2
+    assert "(#nixos-mailserver-basic-setup)" in fixed
+    assert "(mailserver.md#nixos-mailserver)" in fixed
+    assert "platform-releases" not in fixed

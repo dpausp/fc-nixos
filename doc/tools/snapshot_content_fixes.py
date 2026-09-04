@@ -145,6 +145,126 @@ FIXES: list[tuple[str, str]] = [
         "../../platform-releases/fc-26.05-production/upgrades-whats-new.md#nixos-upgrade-k3s",
         "#nixos-upgrade-k3s",
     ),
+    # late 26.05 finds: slurm upgrade notes + webproxy anchor variant
+    # (#nixos-webproxy, not the #nixos-webgateway entry above)
+    (
+        "../../platform-releases/fc-26.05-production/upgrade.md#nixos-upgrade",
+        "../platform/upgrades-whats-new.md#nixos-upgrade",
+    ),
+    (
+        "../../platform-releases/fc-26.05-production/webproxy.md#nixos-webproxy",
+        "../components/webproxy.md#nixos-webproxy",
+    ),
+    # 25.11-era platform-releases remnants (folded from the 25.11 branch
+    # link fixes). Same ordering rules: longer anchors first.
+    (
+        "../../platform-releases/fc-25.11-production/mailserver.md#nixos-mailserver-basic-setup",
+        "#nixos-mailserver-basic-setup",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/mailserver.md#mail-into-backends",
+        "#mail-into-backends",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/mailserver.md#nixos-mailserver",
+        "mailserver.md#nixos-mailserver",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/postgresql.md#nixos-postgresql-server",
+        "postgresql.md#nixos-postgresql-server",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/postgresql.md#nixos-postgresql-major-upgrade",
+        "../components/postgresql.md#nixos-postgresql-major-upgrade",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/mysql.md#nixos-mysql",
+        "mysql.md#nixos-mysql",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/devhost.md#nixos-devhost",
+        "devhost.md#nixos-devhost",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/statshost.md#nixos-statshost",
+        "statshost.md#nixos-statshost",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/local.md#nixos-custom-modules",
+        "../platform/local.md#nixos-custom-modules",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/local.md#nixos-local",
+        "../platform/local.md#nixos-local",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/slurm.md#nixos-slurm-config-reference",
+        "#nixos-slurm-config-reference",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/slurm.md#nixos-fc-slurm",
+        "#nixos-fc-slurm",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/slurm.md#nixos-slurm-upgrade",
+        "../components/slurm.md#nixos-slurm-upgrade",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrade.md#nixos-upgrade",
+        "../platform/upgrades-whats-new.md#nixos-upgrade",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/user_profile.md#nixos-user-package-management",
+        "user-profile.md#nixos-user-package-management",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/systemd.md#nixos-systemd-app-service-example",
+        "#nixos-systemd-app-service-example",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/logrotate.md#nixos-logrotate",
+        "logrotate.md#nixos-logrotate",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/index.md#nixos-components",
+        "../index.md#nixos-components",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/webgateway.md#nixos-webgateway",
+        "webgateway.md#nixos-webgateway",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/ferretdb.md#nixos-ferretdb",
+        "ferretdb.md#nixos-ferretdb",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-general",
+        "#nixos-upgrade-general",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-breaking",
+        "#nixos-upgrade-breaking",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-postgresql",
+        "#nixos-upgrade-postgresql",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-percona",
+        "#nixos-upgrade-percona",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-webgateway",
+        "#nixos-upgrade-webgateway",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-mail",
+        "#nixos-upgrade-mail",
+    ),
+    (
+        "../../platform-releases/fc-25.11-production/upgrades-whats-new.md#nixos-upgrade-slurm",
+        "#nixos-upgrade-slurm",
+    ),
     # split-era targets under ../platform/<branch>/ (components/ pages)
     (
         "../platform/fc-26.05-production/local.md#nixos-custom-modules",
@@ -256,11 +376,27 @@ FILE_FIXES: dict[str, list[tuple[str, str]]] = {
             "behind a [webgateway](../../platform-releases/fc-26.05-production/webgateway.md#nixos-webgateway)",
             "behind a [webgateway](webgateway.md#nixos-webgateway)",
         ),
+        (
+            "behind a [webgateway](../../platform-releases/fc-25.11-production/webgateway.md#nixos-webgateway)",
+            "behind a [webgateway](webgateway.md#nixos-webgateway)",
+        ),
     ],
     "platform/deployment/lamp.md": [
         (
             "behind a [webgateway](../../platform-releases/fc-26.05-production/webgateway.md#nixos-webgateway)",
             "behind a [webgateway](../../components/webgateway.md#nixos-webgateway)",
+        ),
+        (
+            "behind a [webgateway](../../platform-releases/fc-25.11-production/webgateway.md#nixos-webgateway)",
+            "behind a [webgateway](../../components/webgateway.md#nixos-webgateway)",
+        ),
+    ],
+    # same dead ferretdb URL as the global pair, but this page sits in
+    # platform/deployment/ and must cross into ../../components/
+    "platform/deployment/mongodb.md": [
+        (
+            "[FerretDB role](../../platform-releases/fc-25.11-production/ferretdb.md#nixos-ferretdb)",
+            "[FerretDB role](../../components/ferretdb.md#nixos-ferretdb)",
         ),
     ],
     # platform/ pages link their same-dir local.md; the components/
@@ -270,11 +406,45 @@ FILE_FIXES: dict[str, list[tuple[str, str]]] = {
             "../../platform-releases/fc-26.05-production/local.md#nixos-local",
             "local.md#nixos-local",
         ),
+        (
+            "../../platform-releases/fc-25.11-production/local.md#nixos-local",
+            "local.md#nixos-local",
+        ),
     ],
     "platform/systemd.md": [
         (
             "../../platform-releases/fc-26.05-production/local.md#nixos-local",
             "local.md#nixos-local",
+        ),
+        (
+            "../../platform-releases/fc-25.11-production/local.md#nixos-local",
+            "local.md#nixos-local",
+        ),
+    ],
+    # anchor backfill: security/data-protection.md links
+    # platform/users/index.md#permissions, but that section only exists
+    # from the branch mdBook-link fixes onward. The old string is the
+    # pre-fix shape (components heading directly followed by the
+    # [nixos] link definition), so the section is injected ONLY where
+    # missing -- fixed-branch content is left untouched.
+    "platform/users/index.md": [
+        (
+            "## Specific software components (roles) { #nixos-components }\n"
+            "\n"
+            "\n"
+            "[nixos]: https://nixos.org",
+            "## Specific software components (roles) { #nixos-components }\n"
+            "\n"
+            "## Permissions { #permissions }\n"
+            "\n"
+            "Permissions control user access to VMs and services. "
+            "They are managed centrally via\n"
+            "[my.flyingcircus.io](https://my.flyingcircus.io) and provisioned to all relevant\n"
+            "systems, including proper removal of access rights. "
+            "See also the permission table\n"
+            "in the platform documentation.\n"
+            "\n"
+            "[nixos]: https://nixos.org",
         ),
     ],
 }
