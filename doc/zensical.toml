@@ -407,6 +407,7 @@ features = [
     "navigation.instant.prefetch",
     "navigation.path",
     "navigation.top",
+    "navigation.sections",
     "navigation.tracking",
     "search.highlight",
 ]
