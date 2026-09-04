@@ -59,6 +59,7 @@ extra_javascript = [
 ]
 
 nav = [
+  { "Support" = "support/overview.md" },
   # Hand-maintained: the plain first entry IS the newest release; the
   # Archive page (changes/index.md) links every release of every year.
   # Cutting a release: update the first entry and add the archive line.
@@ -73,7 +74,6 @@ nav = [
       "security/policy.md",
       "security/software-vulnerabilities.md"
   ] },
-  { "Support" = "support/overview.md" },
   { "Infrastructure" = [
       { "Getting started" = "infrastructure/getting-started.md" },
       { "VMs" = "infrastructure/vms.md" },
