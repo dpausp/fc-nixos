@@ -1,4 +1,4 @@
-.PHONY: all html clean
+.PHONY: all html serve clean
 
 all: checkout-versioned-docs gen-platform-versions html
 
@@ -11,5 +11,11 @@ checkout-versioned-docs:
 html:
 	./zensical build
 
+serve: checkout-versioned-docs gen-platform-versions
+	./zensical serve
+
+VERSIONED_DIRS := 25.11 26.05
+
 clean:
-	rm -rf _build
+	rm -rf _build $(VERSIONED_DIRS:%=src/%)
+	rm -f src/.checkout-manifest.json
