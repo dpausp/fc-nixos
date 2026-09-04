@@ -1,24 +1,22 @@
 {#-
   Local override of the built-in partial (upstream zensical 0.0.55,
-  byte-identical except for the ONE hunk marked below): with the
+  differs in the ONE hunk marked below): with the
   ``navigation.sections`` feature every level-1 nav group with children
-  renders as a STATIC section -- always visible, no collapse toggle, not
-  keyboard-focusable. That is the wip-style sidebar (1947:bfb6acb20ece)
-  -- EXCEPT for the Changelog, Security and Support, whose groups would
-  otherwise flood every page permanently (commit 1959 dropped the global
-  feature for exactly that reason). The hunk exempts a level-1 group whose
-  index page lives under ``changes/``, ``security/`` or ``support/`` from
-  ``is_section``: it stays a regular collapsible nested
-  item, and the groups under it keep folding as usual
-  (navigation.sections only fires at level 1 without navigation.tabs).
+  renders as a STATIC section -- always visible, no collapse toggle.
+  The "General" group (Changelog, Security, Support) is such a section,
+  but its TITLE is silent: the hunk adds ``md-nav__item--silent`` for
+  the level-1 group titled "General", and flyingcircus.css hides that
+  section's two title labels on desktop only (the mobile drawer keeps
+  the label -- it is the only way to expand the group). Keyed on the
+  group title so it follows the config: no custom JavaScript.
 
-  The exemption is keyed on the index URL so it follows the config: no
-  custom JavaScript, no additional hunks. ``navigation.expand`` is
-  deliberately NOT used -- it would cascade to every nested group.
+  An earlier hunk here exempted changes//security//support/ index
+  groups from section rendering (navigation.indexes-era); it was inert
+  since that feature is off and has been removed.
 
-  Drift guard: tests/test_nav_sections.py renders upstream on non-exempt
-  input and asserts byte equality with this copy -- a zensical bump that
-  touches this partial breaks it and forces a conscious re-sync.
+  Guard: tests/test_nav_general.py pins the hunk, the CSS rule and the
+  nav shape -- a zensical bump that touches this partial breaks the
+  pinned strings and forces a conscious re-sync.
 -#}
 {% macro render_status(nav_item, type) %}
   {% set class = "md-status md-status--" ~ type %}
@@ -98,13 +96,12 @@
         {% endif %}
       {% endif %}
     {% elif "navigation.sections" in features %}
-      {% if level == 1 and not (index and (
-          index.url[:8] == "changes/" or
-          index.url[:9] == "security/" or
-          index.url[:8] == "support/"
-      )) %}
+      {% if level == 1 %}
         {% set class = class ~ " md-nav__item--section" %}
         {% set is_section = true %}
+        {% if nav_item.title == "General" %}
+          {% set class = class ~ " md-nav__item--silent" %}
+        {% endif %}
       {% endif %}
     {% endif %}
     {% if "navigation.prune" in features %}

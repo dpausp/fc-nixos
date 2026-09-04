@@ -59,20 +59,22 @@ extra_javascript = [
 ]
 
 nav = [
-  { "Support" = "support/overview.md" },
-  # Hand-maintained: the plain first entry IS the newest release; the
-  # Archive page (changes/index.md) links every release of every year.
-  # Cutting a release: update the first entry and add the archive line.
-  { "Changelog" = [
-      "changes/2026/r033.md",
-      { "Archive" = "changes/index.md" }
-  ] },
-  { "Security" = [
-      "security/data-protection.md",
-      "security/disaster-recovery.md",
-      "security/network.md",
-      "security/policy.md",
-      "security/software-vulnerabilities.md"
+  # "General" is the silent section: its title is hidden on desktop via
+  # the nav-item.html hunk + flyingcircus.css (pinned by
+  # tests/test_nav_general.py). Changelog links the current release
+  # directly; the archive (changes/index.md) is generated -- cutting a
+  # release: update the Changelog target and run
+  # `./appenv python -m tools.gen_changes_index`.
+  { "General" = [
+      { "Changelog" = "changes/2026/r033.md" },
+      { "Security" = [
+          "security/data-protection.md",
+          "security/disaster-recovery.md",
+          "security/network.md",
+          "security/policy.md",
+          "security/software-vulnerabilities.md"
+      ] },
+      { "Support" = "support/overview.md" }
   ] },
   { "Infrastructure" = [
       { "Getting started" = "infrastructure/getting-started.md" },

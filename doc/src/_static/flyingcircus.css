@@ -226,6 +226,16 @@ ul ul {
   max-width: 100%;
   box-sizing: border-box;
 }
+/* Silent "General" section (first nav group): its two title labels are
+   hidden on desktop so Changelog/Security/Support float at the top of the
+   sidebar like top-level links. Mobile drawer keeps the label -- it is the
+   only way to expand the group. Class comes from the nav-item.html hunk. */
+@media screen and (min-width: 76.25em) {
+  .md-nav__item--silent > label.md-nav__link,
+  .md-nav__item--silent > nav[data-md-level="1"] > label.md-nav__title {
+    display: none;
+  }
+}
 .md-header__button.md-logo img, .md-header__button.md-logo svg {
   height:2rem;
 }
