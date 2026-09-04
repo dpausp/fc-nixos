@@ -5,9 +5,8 @@ Python-Markdown's syntax, so they would render as visible text in the HTML
 output. This preprocessor strips them before parsing.
 
 Fence-aware: content inside fenced code blocks (`` ``` `` and ``~~~``,
-CommonMark semantics) is never touched. Runs before
-``zensical.extensions.macros`` (priority 35) so Jinja2 syntax in comment
-lines is never rendered.
+CommonMark semantics) is never touched. Runs at priority 40, above
+every built-in preprocessor except footnotes (50).
 """
 
 from __future__ import annotations
@@ -20,19 +19,16 @@ from markdown.preprocessors import Preprocessor
 if TYPE_CHECKING:
     from markdown import Markdown
 
-#: Runs before zensical.extensions.macros (35) — Jinja2 must never see
-#: comment lines. Above every built-in preprocessor except footnotes (50).
+#: Above every built-in preprocessor except footnotes (50).
 PRIORITY = 40
 
 
 def strip_comment_lines(lines: list[str]) -> list[str]:
     """Strip MyST ``%`` comment lines outside fenced code blocks.
 
-    Pure helper shared with the reference-inventory collector
-    (``tools.ref_graphs``): the fence grammar (CommonMark `` ``` `` /
-    ``~~~``, same char + at least the opening length to close, nothing
-    but whitespace after) lives here once so the build-side stripper and
-    the collector always agree on what a comment line is.
+    The fence grammar is CommonMark: `` ``` `` / ``~~~``, same fence
+    character and at least the opening length to close, nothing but
+    whitespace after the closing fence.
     """
     result: list[str] = []
     fence_char: str | None = None

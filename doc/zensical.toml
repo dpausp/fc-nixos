@@ -228,11 +228,8 @@ pygments_lang_class = true
 [project.markdown_extensions.pymdownx.smartsymbols]
 [project.markdown_extensions.pymdownx.superfences]
 [project.markdown_extensions.pymdownx.tilde]
-[project.markdown_extensions.zensical.extensions.macros]
-module_name = "docs_hooks"
-
-# Strip MyST % comment lines before the macros preprocessor runs (priority 40
-# vs 35), so Jinja2 syntax in comment lines is never rendered.
+# Strip MyST % comment lines before parsing — they are not Python-Markdown
+# syntax and would render as visible text in the HTML output.
 [project.markdown_extensions.md_comments]
 
 # Image zoom via lightbox overlay (bundled zensical extension, no new
