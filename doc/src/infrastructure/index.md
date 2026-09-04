@@ -12,7 +12,7 @@ Most of the Flying Circus platform is deliberately invisible to your
 virtual machines. This section documents the resources your VMs run on
 and the infrastructure services around them.
 
-- [Virtual machines](vms/index.md): how VMs run on Qemu/KVM, their
+- [Virtual machines](vms.md): how VMs run on Qemu/KVM, their
   resources, maintenance windows and deletion lifecycle.
 - [Networking](networking/index.md): address allocation, connecting to
   VMs, firewall rules and the fallback router.

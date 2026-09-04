@@ -59,7 +59,7 @@ extra_javascript = [
 
 nav = [
       { "Changelog" = [
-    { "2026" = ["changes/2026/index.md",
+    { "2026" = [
       "changes/2026/r001.md",
       "changes/2026/r002.md",
       "changes/2026/r003.md",
@@ -94,7 +94,7 @@ nav = [
       "changes/2026/r032.md",
       "changes/2026/r033.md"
   ] },
-    { "2025" = ["changes/2025/index.md",
+    { "2025" = [
       "changes/2025/r001.md",
       "changes/2025/r002.md",
       "changes/2025/r003.md",
@@ -143,7 +143,7 @@ nav = [
       "changes/2025/r046.md",
       "changes/2025/r047.md"
   ] },
-    { "2024" = ["changes/2024/index.md",
+    { "2024" = [
       "changes/2024/r001.md",
       "changes/2024/r002.md",
       "changes/2024/r003.md",
@@ -180,7 +180,7 @@ nav = [
       "changes/2024/r034.md",
       "changes/2024/r035.md"
   ] },
-    { "2023" = ["changes/2023/index.md",
+    { "2023" = [
       "changes/2023/r001.md",
       "changes/2023/r002.md",
       "changes/2023/r003.md",
@@ -215,7 +215,7 @@ nav = [
       "changes/2023/r032.md",
       "changes/2023/r033.md"
   ] },
-    { "2022" = ["changes/2022/index.md",
+    { "2022" = [
       "changes/2022/r001.md",
       "changes/2022/r002.md",
       "changes/2022/r003.md",
@@ -248,7 +248,7 @@ nav = [
       "changes/2022/r030.md",
       "changes/2022/r031.md"
   ] },
-    { "2021" = ["changes/2021/index.md",
+    { "2021" = [
       "changes/2021/r001.md",
       "changes/2021/r002.md",
       "changes/2021/r003.md",
@@ -304,8 +304,8 @@ nav = [
       "support/shared-screen-sessions.md"
   ] },
   { "Infrastructure" = [
-      { "Getting started" = "infrastructure/getting-started/index.md" },
-      { "VMs" = "infrastructure/vms/index.md" },
+      { "Getting started" = "infrastructure/getting-started.md" },
+      { "VMs" = "infrastructure/vms.md" },
       { "AI & ML" = "infrastructure/ai-ml.md" },
       { "Networking" = [
           "infrastructure/networking/connecting.md",
