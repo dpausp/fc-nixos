@@ -107,3 +107,26 @@ Global texts (security policies, support guidelines) live in the stable
 tree. Older snapshots keep their own copies for contextual integrity; their
 banner links readers to the stable counterpart. Keeping global texts
 stable across snapshots is backport discipline on the version branches.
+
+## Shared Content Snippets
+
+Text that is **identical** on two or more pages belongs in the snippet
+library `snippets/` -- one file per notice, written as the complete
+admonition including a title (`sunsetting-<component>.md` is the naming
+model for banners):
+
+    !!! warning "Sunsetting"
+        The <component> role is in sunsetting. ...
+
+Pages include a snippet right below their H1 via
+`--8<-- "sunsetting-<component>.md"` (`pymdownx.snippets` with
+`base_path = "snippets"` and `check_paths = true`; see `zensical.toml`
+for the warm-cache caveat -- snippet edits surface on cold builds only).
+
+What does **not** belong there: near-variants (snippets cannot be
+parameterized -- one file per variant or no snippet at all), release
+notes (frozen history), and the generated snapshot trees under
+`src/<ver>/` (their banners are injected by
+`tools/checkout_versioned_docs.py`). `tests/test_snippets.py` guards
+both directions: every include must resolve to an existing snippet, and
+no snippet may be orphaned.

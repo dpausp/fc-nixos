@@ -1,7 +1,5 @@
 # Development Host { #nixos-devhost }
 
---8<-- "sunsetting.md"
-
 The `devhost` role is a flexible way to run multiple development deployments
 using slim VMs on a single powerful, physical machine on our public infrastructure.
 
