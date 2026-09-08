@@ -390,6 +390,13 @@ FILE_FIXES: dict[str, list[tuple[str, str]]] = {
             "behind a [webgateway](../../platform-releases/fc-25.11-production/webgateway.md#nixos-webgateway)",
             "behind a [webgateway](../../components/webgateway.md#nixos-webgateway)",
         ),
+        # slimming relocation (see below): the dropped infrastructure/
+        # subtree -- one ../ higher, into the main manual.
+        (
+            "[SRV interface](../../infrastructure/networking/networking.md#logical-networks)",
+            "[SRV interface]"
+            "(../../../infrastructure/networking/networking.md#logical-networks)",
+        ),
     ],
     # same dead ferretdb URL as the global pair, but this page sits in
     # platform/deployment/ and must cross into ../../components/
@@ -445,6 +452,35 @@ FILE_FIXES: dict[str, list[tuple[str, str]]] = {
             "in the platform documentation.\n"
             "\n"
             "[nixos]: https://nixos.org",
+        ),
+    ],
+    # slimming relocations: the 26.05/25.11 branches dropped their
+    # unversioned subtrees (changes/, infrastructure/, security/,
+    # support/ and the root index.md) -- cross-references from the
+    # surviving platform/ pages move one ../ higher into the main
+    # manual or, where the anchor only exists in the snapshot, onto
+    # the surviving in-tree page. The planned branch-side fix retires
+    # these pairs like any other backport debt.
+    # types.md still carries the mangled Sphinx/RST remnant: this pair
+    # consumes it BEFORE the global remnant pair (FILE_FIXES run
+    # first) and emits the corrected main-manual depth directly.
+    "platform/api/types.md": [
+        (
+            "See <project:../../infrastructure/backup.md> for possible values.",
+            "See [the backup documentation]"
+            "(../../../infrastructure/backup.md) for possible values.",
+        ),
+    ],
+    "platform/logging.md": [
+        (
+            "[managed components](../index.md#nixos-components)",
+            "[managed components](users/index.md#nixos-components)",
+        ),
+    ],
+    "platform/philosophy.md": [
+        (
+            "[documenting our approach closely](../security/index.md)",
+            "[documenting our approach closely](../../security/index.md)",
         ),
     ],
 }

@@ -26,7 +26,11 @@ NON-prerelease snapshot -- sunsetting and a non-matched ``[stable]``
 alike -- gets ``search: exclude`` frontmatter (keeping it out of the
 search index) and a warning banner linking the counterpart in the
 built manual when it exists; only the banner wording differs (an old
-stable's public status is stable, never sunsetting). Otherwise
+stable's public status is stable, never sunsetting). A NON-prerelease
+snapshot whose slimmed branch tree lacks ``index.md`` gets a minimal
+index stub first (:func:`ensure_version_index`): the version root URL
+``/<ver>/`` -- the switcher payload's ``index`` entry and the root
+page of every version -- must serve. Otherwise
 prerelease snapshots stay verbatim: they ARE the integration line.
 
 A manifest (``src/.checkout-manifest.json``) records the exported ref
@@ -268,6 +272,37 @@ def banner(
     )
 
 
+# Minimal version-root page for slimmed snapshot trees (see
+# :func:`ensure_version_index`): the banner and frontmatter are added
+# by :func:`process_snapshot` like on every snapshot page.
+VERSION_INDEX_STUB = (
+    "# Flying Circus platform {ver}\n"
+    "\n"
+    "This is the archived documentation of platform version {ver};"
+    " unversioned pages live in the current manual.\n"
+)
+
+
+def ensure_version_index(tree: Path, ver: str) -> bool:
+    """Write a minimal ``index.md`` when a slimmed snapshot lacks one.
+
+    Slimmed version branches carry only their versioned subtrees
+    (``platform/``, ``components/``) -- without ``index.md`` the
+    version root URL ``/<ver>/`` (the switcher payload's ``index``
+    entry and the root page of every version) would 404. The stub is
+    written BEFORE :func:`process_snapshot` so it receives the same
+    ``search: exclude`` frontmatter and warning banner as every other
+    snapshot page. Returns True when a stub was written; an existing
+    ``index.md`` is never touched.
+    """
+    index = tree / "index.md"
+    if index.exists():
+        return False
+    index.write_text(VERSION_INDEX_STUB.format(ver=ver), encoding="utf-8")
+    log.info("version-index-stubbed", ver=ver)
+    return True
+
+
 def prune_orphans(src_root: Path, keep: set[str]) -> list[str]:
     """Remove undeclared ``src/<NN.NN>/`` snapshot dirs; return their names."""
     pruned = []
@@ -329,6 +364,7 @@ def run_checkout(
         fixed = fix_tree(tree)
         log.info("content-fixes-applied", ver=entry.ver, pages=fixed)
         if entry.status != "prerelease":
+            ensure_version_index(tree, entry.ver)
             process_snapshot(
                 tree, entry.ver, entry.status, manual.ver, src_root
             )
