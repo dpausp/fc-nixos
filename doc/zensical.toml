@@ -108,13 +108,11 @@ nav = [
           { "Firewall" = "platform/firewall.md" },
           { "Garbage Collection" = "platform/garbage-collection.md" },
           { "Local Configuration" = "platform/local.md" },
+          { "Logging" = "platform/logging.md" },
+          { "Monitoring" = "platform/monitoring.md" },
           { "Logrotate" = "platform/logrotate.md" },
           { "Maintenance" = "platform/maintenance.md" },
           { "Systemd" = "platform/systemd.md" }
-      ] },
-      { "Observability" = [
-          { "Logging" = "platform/logging.md" },
-          { "Monitoring" = "platform/monitoring.md" }
       ] },
       { "Deployments" = [
           "platform/deployment/lamp.md",
@@ -179,7 +177,6 @@ features = [
     "navigation.footer",
     "navigation.instant",
     "navigation.instant.prefetch",
-    "navigation.path",
     "navigation.top",
     "navigation.sections",
     "navigation.tracking",
