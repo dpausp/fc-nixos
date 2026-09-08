@@ -220,6 +220,7 @@ permalink = true
 anchor_linenums     = true
 line_spans          = "__span"
 pygments_lang_class = true
+
 [project.markdown_extensions.pymdownx.inlinehilite]
 [project.markdown_extensions.pymdownx.keys]
 [project.markdown_extensions.pymdownx.magiclink]
@@ -242,3 +243,7 @@ pygments_lang_class = true
 [project.markdown_extensions.zensical.extensions.glightbox]
 auto_caption = true
 skip_classes = ["logo"]
+
+[project.markdown_extensions.zensical.extensions.macros]
+include_dir = "snippets"
+on_error_fail = true
