@@ -225,15 +225,17 @@ pygments_lang_class = true
 [project.markdown_extensions.pymdownx.magiclink]
 [project.markdown_extensions.pymdownx.mark]
 [project.markdown_extensions.pymdownx.smartsymbols]
-# Shared markdown fragments (--8<-- "file.md") live under src/snippets/.
+# Shared markdown fragments (--8<-- "file.md") live under snippets/, outside
+# docs_dir (src/) so they never render as standalone pages.
 # check_paths is NOT the default: without it, missing snippets are silently
 # dropped -- we want the build to fail loudly instead (doctrine: no fallback).
 # base_path resolves relative to doc/ (cwd of make/serve, see README).
-# 0.0.57 quirk: warm builds serve snippet-including pages from the render
-# cache (keyed on page content, not snippet content) -- snippet edits/removals
-# only surface on cold builds (CI) or when the including page changes.
+# Warm-cache caveat (verified on 0.0.57 and 0.0.60): 0.0.60's render-cache
+# bypass regex anchors at line 1 -- our markers sit below the H1, so warm
+# builds serve cached pages and snippet edits/removals only surface on cold
+# builds (CI) or when the including page itself changes.
 [project.markdown_extensions.pymdownx.snippets]
-base_path = "src/snippets"
+base_path = "snippets"
 check_paths = true
 [project.markdown_extensions.pymdownx.superfences]
 [project.markdown_extensions.pymdownx.tilde]
