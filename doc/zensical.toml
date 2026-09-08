@@ -220,12 +220,21 @@ permalink = true
 anchor_linenums     = true
 line_spans          = "__span"
 pygments_lang_class = true
-
 [project.markdown_extensions.pymdownx.inlinehilite]
 [project.markdown_extensions.pymdownx.keys]
 [project.markdown_extensions.pymdownx.magiclink]
 [project.markdown_extensions.pymdownx.mark]
 [project.markdown_extensions.pymdownx.smartsymbols]
+# Shared markdown fragments (--8<-- "file.md") live under src/snippets/.
+# check_paths is NOT the default: without it, missing snippets are silently
+# dropped -- we want the build to fail loudly instead (doctrine: no fallback).
+# base_path resolves relative to doc/ (cwd of make/serve, see README).
+# 0.0.57 quirk: warm builds serve snippet-including pages from the render
+# cache (keyed on page content, not snippet content) -- snippet edits/removals
+# only surface on cold builds (CI) or when the including page changes.
+[project.markdown_extensions.pymdownx.snippets]
+base_path = "src/snippets"
+check_paths = true
 [project.markdown_extensions.pymdownx.superfences]
 [project.markdown_extensions.pymdownx.tilde]
 # Strip MyST % comment lines before parsing — they are not Python-Markdown
@@ -243,7 +252,3 @@ pygments_lang_class = true
 [project.markdown_extensions.zensical.extensions.glightbox]
 auto_caption = true
 skip_classes = ["logo"]
-
-[project.markdown_extensions.zensical.extensions.macros]
-include_dir = "snippets"
-on_error_fail = true
