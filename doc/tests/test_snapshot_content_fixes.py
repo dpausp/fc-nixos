@@ -220,3 +220,66 @@ def test_2511_mailserver_prefix_pairs_do_not_mangle_each_other() -> None:
     assert "(#nixos-mailserver-basic-setup)" in fixed
     assert "(mailserver.md#nixos-mailserver)" in fixed
     assert "platform-releases" not in fixed
+
+
+def test_slimming_relocations_point_into_main_manual() -> None:
+    """Slimmed-snapshot cross-references into dropped unversioned
+    subtrees relocate one ../ higher, into the current manual."""
+    api, api_count = fix_page(
+        "platform/api/types.md",
+        "retained. See <project:../../infrastructure/backup.md>"
+        " for possible values.\n",
+    )
+    assert api_count == 1
+    assert (
+        "[the backup documentation](../../../infrastructure/backup.md)" in api
+    )
+    assert "<project:" not in api
+
+    lamp, lamp_count = fix_page(
+        "platform/deployment/lamp.md",
+        "Listens on the [SRV interface]"
+        "(../../infrastructure/networking/networking.md#logical-networks)"
+        " only.\n",
+    )
+    assert lamp_count == 1
+    assert (
+        "[SRV interface]"
+        "(../../../infrastructure/networking/networking.md#logical-networks)"
+        in lamp
+    )
+
+    philosophy, philosophy_count = fix_page(
+        "platform/philosophy.md",
+        "  - [documenting our approach closely](../security/index.md)\n",
+    )
+    assert philosophy_count == 1
+    assert (
+        "[documenting our approach closely](../../security/index.md)"
+        in philosophy
+    )
+
+
+def test_slimming_relocation_stays_in_tree_where_anchor_survives() -> None:
+    """logging.md keeps an in-tree target: only platform/users/index.md
+    carries the #nixos-components anchor, the main index does not."""
+    text = "our [managed components](../index.md#nixos-components) log\n"
+
+    fixed, count = fix_page("platform/logging.md", text)
+
+    assert count == 1
+    assert "[managed components](users/index.md#nixos-components)" in fixed
+
+
+def test_slimming_relocations_are_page_scoped() -> None:
+    """Other pages keep the global treatment: the RST backup remnant on
+    a different page still becomes the unchanged-depth md link."""
+    text = (
+        "retained. See <project:../../infrastructure/backup.md>"
+        " for possible values.\n"
+    )
+
+    fixed, count = fix_page("components/other.md", text)
+
+    assert count == 1
+    assert "[the backup documentation](../../infrastructure/backup.md)" in fixed

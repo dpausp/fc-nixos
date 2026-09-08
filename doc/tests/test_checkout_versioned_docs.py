@@ -21,6 +21,8 @@ repository with bookmarks at two changesets). Pinned behavior:
 - sunsetting pages gain ``search: exclude`` frontmatter plus a warning
   banner that links the stable counterpart ONLY when it exists in the
   local tree (dead refs would break build-time link validation);
+- a slimmed NON-prerelease snapshot without ``index.md`` gets a minimal
+  index stub (annotated like every snapshot page) so ``/<ver>/`` serves;
 - unchanged node + tool fingerprint = skip (manual tree edits
   survive), fingerprint change = re-place (fresh archive);
 - undeclared ``src/<NN.NN>/`` dirs are pruned, manifest rewritten.
@@ -205,6 +207,31 @@ def test_sunsetting_pages_get_frontmatter_and_banner(
     assert '!!! warning "Documentation for platform version 25.11"' in text
     assert "[26.05 version](../../components/postgresql)" in text
     assert "# postgresql v1" in text
+
+
+def test_slimmed_snapshot_gets_index_stub(
+    project: tuple[Path, Path, Path],
+) -> None:
+    """A slimmed branch tree without index.md places a minimal stub,
+    annotated like every snapshot page (frontmatter + banner): the
+    version root URL /<ver>/ -- the payload's index entry and the
+    switcher's root page -- must serve."""
+    repo, doc_src, _ = project
+    hg(repo, "up", "fc-25.11-production")
+    hg(repo, "rm", "doc/src/25.11/index.md")
+    hg(repo, "commit", "-m", "r4: slim 25.11 tree (drop index.md)")
+    hg(repo, "up", "fc-26.05-production")
+
+    assert run(project) == 0
+
+    stub = doc_src / "25.11" / "index.md"
+    assert stub.is_file()
+    text = stub.read_text()
+    assert text.startswith("---\n")
+    frontmatter = text.split("!!! warning", 1)[0]
+    assert "search:" in frontmatter and "exclude: true" in frontmatter
+    assert '!!! warning "Documentation for platform version 25.11"' in text
+    assert "# Flying Circus platform 25.11" in text
 
 
 def test_banner_without_counterpart_links_manual_index(

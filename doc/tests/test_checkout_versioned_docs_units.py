@@ -223,7 +223,8 @@ def test_run_checkout_fixes_then_annotates(
     wired: tuple[Path, Path, Path],
 ) -> None:
     """Placement pipeline on a dirty branch page: link-clean fixes run
-    first (old banner stripped, dead target repaired), then the
+    first (old banner stripped, dead target repaired), then the index
+    stub (the fixture tree carries no index.md), then the
     search-exclude frontmatter and the new banner land -- each step
     logged with the version it touched."""
     repo, src, versions = wired
@@ -239,10 +240,14 @@ def test_run_checkout_fixes_then_annotates(
     assert "](../platform/local.md#nixos-local)" in text
     assert '!!! warning "Documentation for platform version 25.11"' in text
     assert "# old" in text
+    stub = (src / "25.11" / "index.md").read_text()
+    assert "# Flying Circus platform 25.11" in stub
+    assert stub.startswith("---\n")
     events = {event["event"]: event for event in logs}
     assert events["checkout-placed"]["ver"] == "25.11"
     assert events["content-fixes-applied"]["ver"] == "25.11"
     assert events["content-fixes-applied"]["pages"] == 1
+    assert events["version-index-stubbed"]["ver"] == "25.11"
     assert events["snapshot-annotated"]["ver"] == "25.11"
     assert events["snapshot-annotated"]["status"] == "sunsetting"
-    assert events["snapshot-annotated"]["pages"] == 1
+    assert events["snapshot-annotated"]["pages"] == 2

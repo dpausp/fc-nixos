@@ -20,6 +20,10 @@ window.PLATFORM_VERSIONS = {
     }
   },
   "pages": {
+    "": [
+      "26.05",
+      "25.11"
+    ],
     "components/devhost": [
       "26.05",
       "25.11"
