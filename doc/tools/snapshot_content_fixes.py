@@ -13,8 +13,11 @@ supported way to temporarily fix unfixed branch content.
 scoped to one page id (relative to the snapshot root) for dead URLs
 that need a different replacement per source location.
 
-BACKPORT DEBT: as fixes land on the version branches the table
-shrinks -- when every entry matches nothing, this module dies.
+ROLLBACK COVERAGE: pairs stay alive even after their fixes land on
+the branch tips -- ``platform-versions.toml`` may point at any rev
+that carries the namespaced tree, and pre-fix revs still need the
+table (pinned by ``test_rollback_coverage`` against the oldest
+namespaced revs).
 """
 
 from __future__ import annotations
@@ -459,11 +462,14 @@ FILE_FIXES: dict[str, list[tuple[str, str]]] = {
     # support/ and the root index.md) -- cross-references from the
     # surviving platform/ pages move one ../ higher into the main
     # manual or, where the anchor only exists in the snapshot, onto
-    # the surviving in-tree page. The planned branch-side fix retires
-    # these pairs like any other backport debt.
-    # types.md still carries the mangled Sphinx/RST remnant: this pair
-    # consumes it BEFORE the global remnant pair (FILE_FIXES run
-    # first) and emits the corrected main-manual depth directly.
+    # the surviving in-tree page. Branch tips carry the fix at source,
+    # leaving these pairs inert there; they stay alive for placements
+    # from pre-backport revs (rollback contract, see
+    # test_rollback_coverage).
+    # types.md carries the mangled Sphinx/RST remnant in pre-backport
+    # revs: this pair consumes it BEFORE the global remnant pair
+    # (FILE_FIXES run first) and emits the corrected main-manual depth
+    # directly.
     "platform/api/types.md": [
         (
             "See <project:../../infrastructure/backup.md> for possible values.",
