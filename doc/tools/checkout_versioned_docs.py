@@ -258,12 +258,15 @@ def banner(
     page_id: str, ver: str, stable_ver: str, counterpart: bool, clause: str
 ) -> str:
     """Warning banner; links the stable counterpart if it exists."""
+    # .md targets: zensical rewrites (and link-validates) only .md page
+    # refs -- extensionless links pass through raw and 404 on static
+    # hosting that does not negotiate .html.
     up = "../" * (page_id.count("/") + 1)
     if counterpart:
-        target = f"{up}{page_id}"
+        target = f"{up}{page_id}.md"
         where = f"the [{stable_ver} version]({target})"
     else:
-        where = f"the [{stable_ver} manual]({up}index)"
+        where = f"the [{stable_ver} manual]({up}index.md)"
     return (
         f'!!! warning "Documentation for platform version {ver}"\n'
         f"    Platform version {ver} {clause} -- this page is kept for"

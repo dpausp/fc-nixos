@@ -94,7 +94,7 @@ def test_banner_links_counterpart() -> None:
         "    Platform version 25.11 is in sunsetting -- this page is kept"
         " for reference.\n"
         "    The stable documentation for this topic is the"
-        " [26.05 version](../../components/x).\n\n"
+        " [26.05 version](../../components/x.md).\n\n"
     )
 
 
@@ -107,7 +107,7 @@ def test_banner_links_manual_without_counterpart() -> None:
         "    Platform version 25.11 is in sunsetting -- this page is kept"
         " for reference.\n"
         "    The stable documentation for this topic is the"
-        " [26.05 manual](../index).\n\n"
+        " [26.05 manual](../index.md).\n\n"
     )
 
 
@@ -128,7 +128,7 @@ def test_process_snapshot_annotates_sunsetting(tmp_path: Path) -> None:
     assert text.startswith("---\n")
     assert "exclude: true" in text.split("!!! warning", 1)[0]
     assert "is in sunsetting" in text
-    assert "[26.05 manual](../../index)" in text
+    assert "[26.05 manual](../../index.md)" in text
     assert text.endswith("\n# body\n")
     assert count == 1
     assert any(
@@ -155,7 +155,7 @@ def test_process_snapshot_old_stable_wording(tmp_path: Path) -> None:
     text = page.read_text()
     assert "is an older version" in text
     assert "is in sunsetting" not in text
-    assert "[26.11 manual](../index)" in text
+    assert "[26.11 manual](../index.md)" in text
     assert count == 1
 
 

@@ -205,7 +205,7 @@ def test_sunsetting_pages_get_frontmatter_and_banner(
     frontmatter = text.split("!!! warning", 1)[0]
     assert "search:" in frontmatter and "exclude: true" in frontmatter
     assert '!!! warning "Documentation for platform version 25.11"' in text
-    assert "[26.05 version](../../components/postgresql)" in text
+    assert "[26.05 version](../../components/postgresql.md)" in text
     assert "# postgresql v1" in text
 
 
@@ -242,7 +242,7 @@ def test_banner_without_counterpart_links_manual_index(
     assert run(project) == 0
 
     text = (doc_src / "25.11" / "only-old.md").read_text()
-    assert "[26.05 manual](../index)" in text
+    assert "[26.05 manual](../index.md)" in text
     assert "only-old" not in text.split("\n\n", 1)[0].replace("!!! warning", "")
 
 
