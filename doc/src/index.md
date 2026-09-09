@@ -14,9 +14,9 @@ Explore our core guides, infrastructure concepts, and self-service capabilities:
 
 | Topic | Highlights & Quick Links |
 | :--- | :--- |
-| **🚀 Getting Started** | [First Steps & Tutorial](./infrastructure/getting-started/index) · [Application Deployments](./platform/deployment/index.md) · [User Accounts & SSH](./platform/users/index) |
-| **⚙️ Infrastructure & Core** | [Virtual Machines](./vms) · [Dual-Interface Networking](./networking) · [Block Storage](./infrastructure/block-storage) · [Backups](./backup) |
-| **☁️ Self-Service** | [S3-Compatible Object Storage](./s3) · [AI & Machine Learning (Open WebUI, Slurm)](./ai-ml) · [Portal (my.flyingcircus.io)](https://my.flyingcircus.io) |
+| **🚀 Getting Started** | [First Steps & Tutorial](./infrastructure/getting-started.md) · [Application Deployments](./platform/deployment/index.md) · [User Accounts & SSH](./platform/users/index.md) |
+| **⚙️ Infrastructure & Core** | [Virtual Machines](./infrastructure/vms.md) · [Dual-Interface Networking](./infrastructure/networking/index.md) · [Block Storage](./infrastructure/block-storage.md) · [Backups](./infrastructure/backup.md) |
+| **☁️ Self-Service** | [S3-Compatible Object Storage](./s3) · [AI & Machine Learning (Open WebUI, Slurm)](./Infrastructure/ai-ml.md) · [Portal (my.flyingcircus.io)](https://my.flyingcircus.io){:target="_blank"} |
 | **📦 Managed Components** | Ready-to-use environments for PostgreSQL, MariaDB, MySQL, Kubernetes (k3s), NGINX, Redis, OpenSearch, and more. |
 
 ---
@@ -29,7 +29,7 @@ Our platform documentation is versioned to match your active environment. We act
 
 > **Tip:** Use the **version selector in the top-right navigation** to switch to the documentation matching your deployed release.
 
-For detailed migration paths and release history, see the **[Platform What's new and Upgardes](./upgrades)**.
+For detailed migration paths and release history, see the **[Platform What's new and Upgardes](./infrastructure/upgrades-whats-new.md)**.
 
 ---
 
@@ -39,4 +39,4 @@ Need assistance with your setup or want to check operational health?
 
 * **Ticket Support:** Email [support@flyingcircus.io](mailto:support@flyingcircus.io)
 * **Phone Support:** +49 345 219401-0
-* **System Status:** Live incidents and scheduled maintenance at [status.flyingcircus.io](https://status.flyingcircus.io)
+* **System Status:** Live incidents and scheduled maintenance at [status.flyingcircus.io](https://status.flyingcircus.io){:target="_blank"}

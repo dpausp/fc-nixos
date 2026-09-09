@@ -34,6 +34,8 @@ As soon as the status changes to active, it can be used.
 
 ![](../images/infrastructure_object_storage_users_main_active.png)
 
+---
+
 ## Access the object storage
 
 After the user is active, you can connect to the storage using the corresponding access key and secret key.
@@ -67,22 +69,22 @@ Here are some examples how to interact with our cluster with `awscli2`.
 
 1. Create the file `~/.aws/config` with the following content. This ensures compatibility with our object storage implementation.
 
-```
-[default]
-request_checksum_calculation=when_required
-response_checksum_calculation=when_required
-```
+	```
+	[default]
+	request_checksum_calculation=when_required
+	response_checksum_calculation=when_required
+	```
 
 2. Create the file `~/.aws/credentials` with the following content.
 Adjust the access key and secret key with the values presented to you when you created the user.
 Also adjust the endpoint if your object storage user is in a different location.
 
-```
-[default]
-endpoint_url=https://objects.rzob.fcio.net
-aws_access_key_id=displayed_access_key
-aws_secret_access_key=displayed_secret_key
-```
+	```
+	[default]
+	endpoint_url=https://objects.rzob.fcio.net
+	aws_access_key_id=displayed_access_key
+	aws_secret_access_key=displayed_secret_key
+	```
 
 
 #### Create your first bucket
@@ -97,6 +99,7 @@ aws s3api create-bucket --bucket mybucketname-23123
 
 Now you can use the object storage and store files in it.
 
+---
 
 ## Deletion
 
@@ -132,7 +135,7 @@ should be respected when implementing object storage in your application
 to avoid problems later on and increase compatibility with third party
 applications.
 
-### Store the object locations in your application's database
+### Store object locations
 
 The best investment you can make when starting (or evolving) your usage of object storage
 your application is to store the specific bucket and object key in
@@ -150,11 +153,11 @@ This allows you to later decide for a different organization scheme and change y
 
 You can then write a (slow) migration script that checks all objects whether their bucket and id is still the one that your application would generate now and if it is not you can copy the object, update the database and delete the old object, to perform a no-downtime migration.
 
-### Organize your objects using prefixes (use /pictures/1234.jpg instead of picture1234.jpg)
+### Organize objects using prefixes
 
 Theoretically you can grow bucket sizes almost infinitely and just throw objects
 into it without any structure. However, S3 supports something resembling a file
-hierarchy within a bucket by putting forward slashes ("/") into the key names.
+hierarchy within a bucket by putting forward slashes ("/") into the key names. For example, it is recommended to use /pictures/1234.jpg instead of picture1234.jpg.
 This helps utilities that need to list keys because the API allows to
 efficiently retrieve those listings by providing a search prefix. The "/" is a
 common delimiter that many tools (like rclone) can automatically recognize and
@@ -250,14 +253,13 @@ This would result in the following sharding structure that distributes quite eve
     └──11-9000371.pdf
 ```
 
-### Be aware of the global bucket namespace (suffix your buckets with short uuids – "app-2022-d7b54fd") { #object-storage-global-bucket-namespace }
+### Global bucket namespace { #object-storage-global-bucket-namespace }
 
 S3 considers the bucket namespace to be global "within a partition". This means
 that you must not rely in specific bucket names to be available to your
 application. See Amazon's "Buckets overview" for more information.
 
-Our recommendation is to use a combination of your applications name, the
-sharding criteria and a short random uuid (7 hexdigits) and be prepared to
+Be aware of this global namespace and suffix your buckets with short uuids (e.g., app-2022-d7b54fd). Our recommendation is to use a combination of your applications name, the sharding criteria and a short random uuid (7 hexdigits) and be prepared to
 regenerate the random uuid if it already exists but was created by another
 account. Examples of good bucket names:
 
@@ -271,10 +273,10 @@ bucket names that you have created in your application's database for certain
 purposes, like ("this year's bucket for customer X is
 named "myapp-X-2022-54fdb32").
 
-### Limit total bucket size (organize buckets with "app-2022" or "app-customer1")
+### Limit total bucket size
 
 Another layer to make things more manageable is to create new buckets to
-restrict a single bucket's total size (number of objects and data size). In
+restrict a single bucket's total size (number of objects and data size). For example, you can organize buckets with identifiers like app-2022 or app-customer1. In
 general you should not have a lot of buckets. It's fine to have large buckets
 as long as you organize them as shown above. However, two reasons exist to
 split your data into multiple buckets: failure domain and customer data
@@ -308,119 +310,115 @@ myapp-2023-46663de
 
 ## Common configuration examples
 
-### Including static assets from a different domain (Cross-Origin Resource Sharing/CORS)
+### Cross-Origin Resource Sharing (CORS)
 
-Using our central object gateways means you have to be aware of CORS issues when embedding static
-resources from an object storage bucket: our generic domains (e.g. `objects.rzob.fcio.net`) will be considered 
-foreign domains when embedding resources from e.g. `example.com`. This is a security feature and modern browsers will block those requests if not configured properly.
+Using our central object gateways means you have to be aware of CORS issues when including static assets from a different domain: our generic domains (e.g. `objects.rzob.fcio.net`) will be considered foreign domains when embedding resources from e.g. `example.com`. This is a security feature and modern browsers will block those requests if not configured properly.
 
 CORS is managed on a per-bucket basis using the S3 API.
 The commands depend on the tool you are using. Here is an example with `awscli2`.
 
-1. Create a configuration file (e.g., `cors-config.json`):
+1. **Create a configuration file (e.g., `cors-config.json`):**
+	This example allows a specific domain to perform `GET` and `HEAD` requests and enables the browser to cache the permission for one hour (`MaxAgeSeconds`).
+	
+	```json
+	{
+	"CORSRules": [
+	 {
+	   "AllowedOrigins": ["https://example.com"],
+	   "AllowedMethods": ["GET", "HEAD"],
+	   "AllowedHeaders": ["*"],
+	   "MaxAgeSeconds": 3600
+	 }
+	]
+	}
+	```
+	
+	The parameters used here are:
+	
+	* `AllowedOrigins`: The domains allowed to access the bucket (e.g., `https://example.com`).
+	* `AllowedMethods`: HTTP methods allowed (e.g., `GET`, `PUT`, `POST`, `DELETE`, `HEAD`).
+	* `AllowedHeaders`: Specifies which headers are allowed in a preflight request.
+	* `MaxAgeSeconds`: How long (in seconds) the browser should cache the CORS response.
+	
+	
+	To learn more about these and the other available parameters, check
+	the official S3 documentation ["Elements of a CORS configuration"](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html).
 
-  This example allows a specific domain to perform `GET` and `HEAD` requests and enables the browser to cache the permission for one hour (`MaxAgeSeconds`).
+2. **Apply the configuration to your bucket:**
 
-  ```json
-  {
-   "CORSRules": [
-     {
-       "AllowedOrigins": ["https://example.com"],
-       "AllowedMethods": ["GET", "HEAD"],
-       "AllowedHeaders": ["*"],
-       "MaxAgeSeconds": 3600
-     }
-   ]
-  }
-  ```
+	Replace `<mybucketname-23123>` with your actual bucket name.
+	
+	```bash
+	aws s3api put-bucket-cors --bucket <mybucketname-23123> --cors-configuration file://cors-config.json
+	```
 
-  The parameters used here are:
-  * `AllowedOrigins`: The domains allowed to access the bucket (e.g., `https://example.com`).
-  * `AllowedMethods`: HTTP methods allowed (e.g., `GET`, `PUT`, `POST`, `DELETE`, `HEAD`).
-  * `AllowedHeaders`: Specifies which headers are allowed in a preflight request.
-  * `MaxAgeSeconds`: How long (in seconds) the browser should cache the CORS response.
-
-  To learn more about these and the other available parameters, check
-  the official S3 documentation ["Elements of a CORS configuration"](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html).
-
-2. Apply the configuration to your bucket:
-
-  Replace `<mybucketname-23123>` with your actual bucket name.
-
-  ```bash
-  aws s3api put-bucket-cors --bucket <mybucketname-23123> --cors-configuration file://cors-config.json
-  ```
-
-3. Verify the configuration:
+3. **Verify the configuration:**
   ```bash
   aws s3api get-bucket-cors --bucket <mybucketname-23123>
   ```
 
-### Using separate object storage users to provide read-only access
+### Read-only access
 
 Object storage users have full access to all buckets and objects that have been created by them.
 
-If you need to separate access in a more fine grained way, for example to have non-public objects
-accessible by some application with only read access, you can create a separate user and grant
-permissions to specific objects and buckets using _bucket policies_.
+If you need to separate access in a more fine grained way, for example to have non-public objects accessible by some application with only read access, you can use separate object storage users and grant permissions to specific objects and buckets using _bucket policies_.
 
 In this example, we create a read-only bucket policy that grants only `s3:Get*` and `s3:List*` permissions with `awscli2`.
 
-1. Create two users in the portal:
+1. **Create two users in the portal:**
 
-  In our example we use "myrg:main-user" and "myrg:readonly-user", replace those with your specific user IDs.
+	In our example we use "myrg:main-user" and "myrg:readonly-user", replace those with your specific user IDs.
+	
+	Note: the read-only user will still be able to create buckets and objects under its own account, but will only have read access to the data stored by the "main-user".
 
-  Note: the read-only user will still be able to create buckets and objects under its own account, but will
-  only have read access to the data stored by the "main-user".
+2. **Create a read-only policy file**
+	 
+	Create a file named `readonly-policy.json`.
+	Replace `myrg:readonly-user` with the user id shown in the portal and `mybucketname-23123` with your actual bucket name.
+	
+	```json
+	{
+	"Version": "2012-10-17",
+	"Statement": [
+	  {
+	    "Sid": "ReadOnlyAccess",
+	    "Effect": "Allow",
+	    "Principal": {
+	      "AWS": ["arn:aws:iam:::user/myrg:readonly-user"]
+	    },
+	    "Action": [
+	      "s3:Get*",
+	      "s3:List*"
+	    ],
+	    "Resource": [
+	      "arn:aws:s3:::mybucketname-23123",
+	      "arn:aws:s3:::mybucketname-23123/*"
+	    ]
+	  }
+	]
+	}
+	```
+	
+	!!! note
+		Note that the policy includes two resources: the bucket itself (`arn:aws:s3:::mybucketname-23123`) for listing actions, and the objects within it (`.../*`) for retrieval actions.
+	
+3. **Apply the policy to your bucket**
 
-2. Create a read-only policy file
- 
-  Create a file named `readonly-policy.json`.
-  Replace `myrg:readonly-user` with the user id shown in the portal and `mybucketname-23123` with your actual bucket name.
+	Run this command with the bucket owner credentials or another user that has administrator privileges on the bucket:
+	
+	```bash
+	aws s3api put-bucket-policy --bucket mybucketname-23123 --policy file://readonly-policy.json
+	```
 
-  ```json
-  {
-    "Version": "2012-10-17",
-    "Statement": [
-      {
-        "Sid": "ReadOnlyAccess",
-        "Effect": "Allow",
-        "Principal": {
-          "AWS": ["arn:aws:iam:::user/myrg:readonly-user"]
-        },
-        "Action": [
-          "s3:Get*",
-          "s3:List*"
-        ],
-        "Resource": [
-          "arn:aws:s3:::mybucketname-23123",
-          "arn:aws:s3:::mybucketname-23123/*"
-        ]
-      }
-    ]
-  }
-  ```
+4. **Verify permissions**
 
-  !!! note
-      Note that the policy includes two resources: the bucket itself (`arn:aws:s3:::mybucketname-23123`)
-      for listing actions, and the objects within it (`.../*`) for retrieval actions.
-
-3. Apply the policy to your bucket
-
-  Run this command with the bucket owner credentials or another user that has administrator privileges on the bucket:
-
-  ```bash
-  aws s3api put-bucket-policy --bucket mybucketname-23123 --policy file://readonly-policy.json
-  ```
-
-4. Verify permissions
-
-  Once applied, the user will be able to perform:
-  * `aws s3 ls s3://mybucketname-23123` (Listing objects)
-  * `aws s3 cp s3://mybucketname-23123/file.txt .` (Downloading objects)
-
-  Any attempt to upload (`s3 cp <local> s3://mybucketname-23123/xyz`)
-  or delete (`s3 rm`) will result in an **Access Denied (403)** error.
+	Once applied, the user will be able to perform:
+	  
+	* `aws s3 ls s3://mybucketname-23123` (Listing objects)
+	* `aws s3 cp s3://mybucketname-23123/file.txt .` (Downloading objects)
+	
+	Any attempt to upload (`s3 cp <local> s3://mybucketname-23123/xyz`)
+	or delete (`s3 rm`) will result in an **Access Denied (403)** error.
 
 
 ### Object Lifecycle Management
@@ -428,38 +426,38 @@ In this example, we create a read-only bucket policy that grants only `s3:Get*` 
 If you have buckets with data that is only intended to be temporary, you can leverage **Lifecycle Policies**
 to automatically clean up your data and manage storage cost.
 
-1. Create a lifecycle configuration
+1. **Create a lifecycle configuration**
 
-  Create a file named `lifecycle.json`.
-  This example defines a rule that automatically deletes all objects with the prefix `logs/` after 90 days.
+	Create a file named `lifecycle.json`.
+	This example defines a rule that automatically deletes all objects with the prefix `logs/` after 90 days.
+	
+	```json
+	{
+	"Rules": [
+	  {
+	    "ID": "DeleteOldLogs",
+	    "Prefix": "logs/",
+	    "Status": "Enabled",
+	    "Expiration": {
+	      "Days": 90
+	    }
+	  }
+	]
+	}
+	```
 
-  ```json
-  {
-    "Rules": [
-      {
-        "ID": "DeleteOldLogs",
-        "Prefix": "logs/",
-        "Status": "Enabled",
-        "Expiration": {
-          "Days": 90
-        }
-      }
-    ]
-  }
-  ```
+2. **Apply the policy**
 
-2. Apply the policy
+	Apply the configuration to your bucket:
+	
+	```bash
+	aws s3api put-bucket-lifecycle-configuration --bucket mybucketname-23123 --lifecycle-configuration file://lifecycle.json
+	```
 
-  Apply the configuration to your bucket:
-
-  ```bash
-  aws s3api put-bucket-lifecycle-configuration --bucket mybucketname-23123 --lifecycle-configuration file://lifecycle.json
-  ```
-
-3. Verify the policy
-  ```bash
-  aws s3api get-bucket-lifecycle-configuration --bucket mybucketname-23123
-  ```
+3. **Verify the policy**
+	```bash
+	aws s3api get-bucket-lifecycle-configuration --bucket mybucketname-23123
+	```
 
 !!! warning
     **Data deletion is permanent:** Once an object is deleted by a lifecycle policy, it cannot be recovered.
@@ -472,7 +470,7 @@ due to the fact that S3 is a vendor-specific defacto standard, not all of origin
 and may diverge over time depending on decisions made by Amazon and the ability of the Ceph commmunity to 
 adapt to those changes.
 
-If you need specific features, you can check the [Ceph S3 feature support matrix](https://docs.ceph.com/en/nautilus/radosgw/s3/#features-support).
+If you need specific features, you can check the [Ceph S3 feature support matrix](https://docs.ceph.com/en/nautilus/radosgw/s3/#features-support){:target="_blank"}.
 
 Some features may be supported but are subject to further conditions within our cluster. At the moment the following notes apply:
 
