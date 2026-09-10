@@ -8,28 +8,32 @@ always matches the OS code of the current branch.
 
 ## How to Build and Preview Locally
 
-We use `uv` (via the `appenv` wrapper) to manage dependencies and the Python
-environment. You do not need a full Nix environment to build the docs!
+We use `appenv` (using `uv` under the hood) to manage dependencies and the Python
+environment. `./zensical` can be used directly to build docs or serve the live preview.
 
-1. **Start the local preview server:**
-   ```bash
-   ./appenv python -m zensical serve -f zensical.toml
-   ```
-   This will start a local web server at `http://localhost:8000`. It features
-   live-reloading: any changes you make to the `.md` files in `src/` will
-   instantly appear in your browser.
+### Live Preview
 
-2. **Build everything (switcher payload, snapshots, HTML):**
-   ```bash
-   make
-   ```
-   or run the individual targets:
+**Start the local preview server:**
+```bash
+./zensical serve
+```
+This will start a local web server at `http://localhost:8000`. It features
+live-reloading: any changes you make to the `.md` files in `src/` will
+instantly appear in your browser.
 
-   | Target | What it does |
-   | --- | --- |
-   | `make gen-platform-versions` | Regenerates `src/_static/platform-versions.js` from `platform-versions.toml` and the page inventory |
-   | `make checkout-versioned-docs` | Places version snapshots under `src/<ver>/` from local revisions |
-   | `make html` | Builds the static HTML into `_build/` |
+### Full Build
+```bash
+make
+```
+or run the individual targets:
+
+| Target | What it does |
+| --- | --- |
+| `make gen-platform-versions` | Regenerates `src/_static/platform-versions.js` from `platform-versions.toml` and the page inventory |
+| `make checkout-versioned-docs` | Places version snapshots under `src/<ver>/` from local revisions |
+| `make html` | Builds the static HTML into `_build/` |
+
+
 
 ## Documentation Versioning
 
