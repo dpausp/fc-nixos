@@ -71,6 +71,142 @@ make    # checkout-versioned-docs -> gen-platform-versions -> html
 ./appenv python -m tools.release_notes ...     # see "Release notes"
 ```
 
+## Versioned documentation
+
+The manual is versioned like the platform: the documentation lives in
+`doc/src/` of the platform repo, so each platform branch carries the
+docs that match its code. `platform-versions.toml` names the versions
+to publish -- the build places ONE of them as the manual at `/` and
+every other as a read-only snapshot under `/<ver>/`. A reader on an
+older platform release reads the documentation of exactly that
+release, at a stable URL.
+
+### URL layout
+
+| URL | Serves |
+| --- | --- |
+| `/` | manual index (the matched version) |
+| `/components/ferretdb.html` | manual page |
+| `/25.11/` | snapshot index |
+| `/25.11/components/ferretdb.html` | the same page, 25.11 snapshot |
+| `/de/security/data-protection.html` | German tree (unversioned) |
+
+The sidebar version switcher appears only on pages that at least one
+snapshot also carries -- common pages (security policies, support)
+get no flyout at all (details in the switcher section below).
+
+### Version switcher
+
+The `src/_static/platform-versions.js` payload is **generated** by
+`make gen-platform-versions` -- never edit it by hand. Releases and
+sunsets are configured exclusively in `platform-versions.toml`. The
+payload is master-centric and inverted:
+
+```json
+{
+  "master": "26.05",
+  "versions": {"<ver>": {"label": "...", "status": "...", "index": "/"}},
+  "pages": {"<page-id>": ["<ver>", "..."]}
+}
+```
+
+`master` is the matched entry's version (the manual built at `/`);
+`pages` has keys only for master pages carried by at least one
+snapshot, each value listing the carrying snapshot versions (without
+the master) in canonical TOML order. A page present only in the
+master tree is a common page without its own switcher; a snapshot
+page without a master equivalent is excluded from the payload and
+triggers the generator's `snapshot-extra-pages` warning. The version
+switcher therefore only ever offers versions that verifiably carry
+the current page.
+
+### Configuration
+
+Versions are driven by `platform-versions.toml`: a `[stable]` entry,
+`[[prerelease]]` and `[[sunsetting]]` entries, each naming a version
+and a **rev** -- an hg bookmark locally, a git mirror branch in CI.
+
+**The matched rev decides what you are building:** the entry whose
+`rev` is matched IS the local manual at `/` and is never checked out.
+Every other entry becomes a snapshot under `src/<ver>/` pulled from
+its own branch. An unresolvable match fails the build loudly; there
+is no fallback -- neither for rev resolution nor for the snapshot
+shapes:
+
+| Category | Public lifecycle | Snapshot source | Placement treatment |
+| --- | --- | --- | --- |
+| `[stable]` (not matched) | previous stable release | namespaced `doc/src/<ver>/**` | warning banner + `search: exclude` |
+| `[[prerelease]]` | upcoming release | whole `doc/src/**` | pages stay untouched |
+| `[[sunsetting]]` | version in phase-out | namespaced `doc/src/<ver>/**` | warning banner + `search: exclude` |
+
+The namespaced shape comes from the branch's one-time **sunset move
+commit** (`hg mv doc/src doc/src/<ver>`); a non-prerelease revision
+without that directory fails the build loudly with the remediation
+hint. Banner pages link the counterpart in the built manual when it
+exists locally, and the banner emits `.md` targets -- zensical
+rewrites them to `.html` and validates them; extensionless targets
+would pass through raw and 404 under static hosting.
+
+Rev resolution is auto-detected at the repository path:
+
+- **hg (local):** the ACTIVE bookmark (`hg su`) selects the manual.
+  `tools/checkout_versioned_docs.py` resolves bookmarks strictly
+  locally (no pull, no network) and exports the snapshots under
+  `src/<ver>/`.
+- **git (CI):** the TOML `rev`s ARE the GitHub mirror branch names,
+  resolved as `refs/remotes/origin/<branch>` of a full clone. The
+  matched ref comes from `--matched`, falling back to
+  `GITHUB_REF_NAME` (the branch GitHub Actions built); with neither
+  set the build fails loudly.
+
+### Content fixes and the rollback contract
+
+At placement, `tools/snapshot_content_fixes.py` rewrites known-stale
+content in the placed trees: per-page string pairs and global
+substitutions (the build logs `content-fixes-applied pages=N`).
+
+Why a fix table instead of only fixing the branches:
+`platform-versions.toml` may point at ANY revision that carries the
+namespaced tree -- a rollback can select a revision older than any
+branch-side fix. The pairs are permanent insurance: typically dead at
+the branch tips (the fix landed there as a backport commit), but live
+for every historical revision in between.
+`tests/test_rollback_coverage.py` pins this contract against the
+oldest namespaced revisions -- every pair must still fire there.
+
+### Operational notes
+
+- **Branch hops need a clean tree:** `src/<ver>/` snapshots are
+  ignored artifacts locally, but the version branches track those
+  paths. `hg up <other-branch>` fails with "untracked file differs"
+  while snapshots are placed -- run `make clean` first.
+- **Skip/redo:** the placement manifest records node + tool
+  fingerprint per version; an unchanged state is skipped. Editing a
+  tool flips the fingerprint and re-places idempotently.
+- **No fallback, anywhere:** unresolvable revs, wrong snapshot
+  shape, missing snippets -- the pipeline fails loudly instead of
+  degrading silently.
+
+### Lifecycle
+
+Compact rules; the tools above do the mechanical part:
+
+- **Upcoming release:** add a `[[prerelease]]` entry (ver + rev); its
+  documentation comes from that branch's `doc/src/`.
+- **Promotion:** move `[stable]` to the new version. The previous
+  stable becomes `[[sunsetting]]` once its branch has the one-time
+  sunset move commit -- the namespaced shape is mandatory from then
+  on.
+- **Global texts** (security policies, support guidelines) live in
+  the stable tree; older snapshots keep their own copies for
+  contextual integrity, and their banners link the stable
+  counterparts. Keeping those copies correct is backport discipline
+  on the version branches.
+- **Version branches stay buildable but clean:** never commit
+  `.appenv/` state there; content fixes that matter at the tip go as
+  backport commits on the branch -- the fix table covers the
+  historical revisions below the tip (see the rollback contract).
+
 ## Writing documentation
 
 ### Tree layout
@@ -92,16 +228,13 @@ make    # checkout-versioned-docs -> gen-platform-versions -> html
 The nav in `zensical.toml` is hand-maintained. A page missing from it
 is still built, but not linked -- zensical does not warn about unlisted
 pages. Unlisted by design: `index.md` (reached via logo and site
-title), the redirect stubs `support/chat.md` and
-`support/shared-screen-sessions.md` (so old bookmarks and snapshot
-banners keep working), and the German tree `src/de/`. When you add a
-page, add its nav entry in the same change -- component pages get both
-from one command (next section).
+title), `devopsguide-de.md` (linked from dead media), and the German
+tree `src/de/`. When you add a page, add its nav entry in the same
+change -- component pages get both from one command (next section).
 
 Pages that must stay out of the search index carry
-`search: exclude: true` frontmatter: the German tree, the redirect
-stubs, and every sunsetting snapshot page (injected automatically at
-placement).
+`search: exclude: true` frontmatter: the German tree and every
+annotated snapshot page (injected automatically at placement).
 
 ### Adding a component page
 
@@ -112,31 +245,30 @@ placement).
 creates `src/components/<name>.md` as a house-convention stub (H1 with
 `{ #nixos-<name> }` anchor, role-option fence, `sudo fc-manage
 switch` hint) and inserts the nav entry alphabetically into the given
-`Components` group. Sunsetting a component works on the same two
-artifacts:
+`Components` group. Removing a component (it no longer exists in the
+current platform version) works on the same two artifacts:
 
 ```bash
-./appenv python -m tools.scaffold_page <name> --sunset
+./appenv python -m tools.scaffold_page <name> --remove
 ```
 
 replaces the page with a tombstone (H1 and anchor stay verbatim) and
 renames the nav label to `<Label> (removed)`. The page file stays on
 purpose: the switcher payload scan is file-existence based, so the
 version switcher keeps offering the snapshots' real documentation for
-the tombstoned page.
+the removed component.
 
 ### Snippets
 
 Text that is **identical** on two or more pages belongs in the snippet
-library `snippets/` -- one file per notice, written as the complete
-admonition including a title (`sunsetting-<component>.md` is the naming
-model for banners):
+library `snippets/` -- one file per notice, named after its topic and
+written as the complete admonition including a title:
 
-    !!! warning "Sunsetting"
-        The <component> role is in sunsetting. ...
+    !!! warning "Title of the notice"
+        The shared text, complete and self-contained. ...
 
 Pages include a snippet right below their H1 via
-`--8<-- "<snippet_name>.md"` (`pymdownx.snippets` with
+`--8<-- "<name>.md"` (`pymdownx.snippets` with
 `base_path = "snippets"` and `check_paths = true`; see `zensical.toml`
 for the warm-cache caveat -- snippet edits surface on cold builds
 only).
@@ -166,130 +298,12 @@ Each release gets a page `src/changes/<year>/r<NNN>.md`:
    in `zensical.toml` to the new page (manual -- the tools do not
    touch the nav).
 
-## Versioned snapshots
-
-### Configuration
-
-Versions are driven by `platform-versions.toml`: a `[stable]` entry,
-`[[prerelease]]` and `[[sunsetting]]` entries, each naming a version
-and a **rev** -- an hg bookmark locally, a git mirror branch in CI.
-The categories describe the PUBLIC lifecycle (stable release,
-upcoming release, phase-out) -- not who is built.
-
-**The matched rev decides what you are building:** the entry whose
-`rev` is matched IS the local manual at `/` and is never checked out.
-Every other entry -- including a non-matched `[stable]` -- becomes a
-snapshot under `src/<ver>/` pulled from its own branch. An
-unresolvable match fails the build loudly; there is no fallback. The
-VCS backend is auto-detected at the repository path:
-
-- **hg (local):** the ACTIVE bookmark (`hg su`) selects the manual.
-  `tools/checkout_versioned_docs.py` resolves bookmarks strictly
-  locally (no pull, no network) and exports the snapshots under
-  `src/<ver>/`.
-- **git (CI):** the TOML `rev`s ARE the GitHub mirror branch names,
-  resolved as `refs/remotes/origin/<branch>` of a full clone. The
-  matched ref comes from `--matched`, falling back to
-  `GITHUB_REF_NAME` (the branch GitHub Actions built); with neither
-  set the build fails loudly.
-
-Snapshot shapes are backend-independent: non-sunsetting snapshot
-revisions (prerelease, or a non-matched `[stable]`) are exported from
-their whole `doc/src/**` tree, and `[[sunsetting]]` revisions must
-carry their docs namespaced at `doc/src/<ver>/**` -- created by the
-branch's one-time **sunset move commit** (`hg mv doc/src
-doc/src/<ver>`). A sunsetting revision without that directory fails
-the build loudly with the remediation hint; there is deliberately
-**no fallback** to the whole-tree shape for old versions.
-
-Sunsetting pages receive `search: exclude` frontmatter and a warning
-banner linking to the counterpart in the built manual when it exists
-locally. The banner emits `.md` targets -- zensical rewrites them to
-`.html` and validates them; extensionless targets would pass through
-raw and 404 under static hosting.
-
-### Content fixes and the rollback contract
-
-At placement, `tools/snapshot_content_fixes.py` rewrites known-stale
-content in the placed trees: per-page string pairs and global
-substitutions (the build logs `content-fixes-applied pages=N`).
-
-Why a fix table instead of only fixing the branches:
-`platform-versions.toml` may point at ANY revision that carries the
-namespaced tree -- a rollback can select a revision older than any
-branch-side fix. The pairs are permanent insurance: typically dead at
-the branch tips (the fix landed there as a backport commit), but live
-for every historical revision in between.
-`tests/test_rollback_coverage.py` pins this contract against the
-oldest namespaced revisions -- every pair must still fire there.
-
-### Operational notes
-
-- **Branch hops need a clean tree:** `src/<ver>/` snapshots are
-  ignored artifacts locally, but the version branches track those
-  paths. `hg up <other-branch>` fails with "untracked file differs"
-  while snapshots are placed -- run `make clean` first.
-- **Skip/redo:** the placement manifest records node + tool
-  fingerprint per version; an unchanged state is skipped. Editing a
-  tool flips the fingerprint and re-places idempotently.
-- **No fallback, anywhere:** unresolvable revs, wrong sunsetting
-  shape, missing snippets -- the pipeline fails loudly instead of
-  degrading silently.
-
-### Version switcher
-
-The `src/_static/platform-versions.js` payload is **generated** by
-`make gen-platform-versions` -- never edit it by hand. Releases and
-sunsets are configured exclusively in `platform-versions.toml`. The
-payload is master-centric and inverted:
-
-```json
-{
-  "master": "26.05",
-  "versions": {"<ver>": {"label": "...", "status": "...", "index": "/"}},
-  "pages": {"<page-id>": ["<ver>", "..."]}
-}
-```
-
-`master` is the matched entry's version (the manual built at `/`);
-`pages` has keys only for master pages carried by at least one
-snapshot, each value listing the carrying snapshot versions (without
-the master) in canonical TOML order. A page present only in the
-master tree is a common page without its own switcher; a snapshot
-page without a master equivalent is excluded from the payload and
-triggers the generator's `snapshot-extra-pages` warning. The version
-switcher therefore only ever offers versions that verifiably carry
-the current page.
-
-## Version lifecycle
-
-Compact rules; the tools above do the mechanical part:
-
-- **Upcoming release:** add a `[[prerelease]]` entry (ver + rev); its
-  documentation comes from that branch's `doc/src/`.
-- **Promotion:** move `[stable]` to the new version. The previous
-  stable becomes `[[sunsetting]]` once its branch has the one-time
-  sunset move commit -- the namespaced shape is mandatory from then
-  on.
-- **Global texts** (security policies, support guidelines) live in
-  the stable tree; older snapshots keep their own copies for
-  contextual integrity, and their banners link the stable
-  counterparts. Keeping those copies correct is backport discipline
-  on the version branches.
-- **Version branches stay buildable but clean:** never commit
-  `.appenv/` state there; content fixes that matter at the tip go as
-  backport commits on the branch -- the fix table covers the
-  historical revisions below the tip (see the rollback contract).
-
 ## Continuous integration
 
 `.github/workflows/docs.yml` builds the manual on every push touching
-`doc/**` (and on `workflow_dispatch`): full-history checkout (all
-mirror branches are needed to resolve the TOML revs), Python 3.13, an
-exactly pinned `uv` with a cache keyed on `uv.lock`, then `make` in
-`doc/`. The HTML lands in `_build/` and is uploaded as a workflow
-artifact; publishing happens elsewhere. The workflow's action refs
-are pinned by `tests/test_docs_workflow.py`.
+`doc/**` (and on `workflow_dispatch`) and uploads the HTML as a
+workflow artifact; publishing happens elsewhere. The workflow's
+action refs are pinned by `tests/test_docs_workflow.py`.
 
 ## Tests
 
