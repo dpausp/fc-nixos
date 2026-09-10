@@ -58,6 +58,7 @@ make    # checkout-versioned-docs -> gen-platform-versions -> html
 | `make checkout-versioned-docs` | Places version snapshots under `src/<ver>/` from the revisions in `platform-versions.toml` |
 | `make gen-platform-versions` | Regenerates `src/_static/platform-versions.js` (switcher payload) from `platform-versions.toml` and the page inventory |
 | `make html` | Builds the static HTML into `_build/` |
+| `make test` | Runs the test suite in `tests/` (see [Tests](#tests)) |
 | `make clean` | Removes `_build/`, the placed `src/<ver>/` trees, and the placement manifest |
 
 ### Running tools directly
@@ -308,9 +309,11 @@ action refs are pinned by `tests/test_docs_workflow.py`.
 ## Tests
 
 ```bash
-cd doc
-uv run pytest tests
+make test
 ```
+
+runs `uv run pytest tests`: uv creates/syncs the doc venv including
+the dev dependency group -- the appenv venv has no pytest.
 
 | Suite | Pins |
 | --- | --- |
