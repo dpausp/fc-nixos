@@ -1,8 +1,8 @@
 name: docs
 
-# The GitHub mirror build of the platform documentation: build the
-# manual via make in doc/ and upload the HTML as an artifact. No
-# deploy job -- publishing happens elsewhere.
+# The GitHub mirror build of the platform documentation: run the doc
+# test suite, build the manual via make in doc/, and upload the HTML
+# as an artifact. No deploy job -- publishing happens elsewhere.
 #
 # The checkout carries FULL history: the doc tools resolve the
 # platform-versions.toml revs as mirror branches
@@ -40,6 +40,10 @@ jobs:
         uses: astral-sh/setup-uv@v10.0.1
         with:
           enable-cache: true
+
+      - name: Run the doc test suite
+        working-directory: doc
+        run: make test
 
       - name: Build the documentation (switcher, snapshots, HTML)
         working-directory: doc
