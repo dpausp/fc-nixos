@@ -1,4 +1,4 @@
-"""Scaffold and sunset component pages in ``doc/``.
+"""Scaffold and remove component pages in ``doc/``.
 
 Two modes over the SAME two artifacts -- the markdown page under
 ``src/components/`` and the hand-maintained explicit navigation in
@@ -10,7 +10,7 @@ Two modes over the SAME two artifacts -- the markdown page under
   switch`` hint) and insert the nav entry alphabetically into the
   chosen ``Components`` group.
 
-* SUNSET (:func:`sunset`): replace a component page with a generic
+* REMOVE (:func:`remove_page`): replace a component page with a generic
   tombstone (H1 + anchor stay verbatim, warning admonition, generic
   switcher hint) and mark the nav label ``<Label> (removed)`` in
   place -- position and sorting untouched. The page file STAYS (no
@@ -70,7 +70,7 @@ COMPRESSED_ENTRY_RE = re.compile(
     r'"(?P<page>[^"]+)" \} \] \},?$'
 )
 
-# Double-sunset marker: the admonition title only a tombstone carries.
+# Double-remove marker: the admonition title only a tombstone carries.
 TOMBSTONE_MARKER = '!!! warning "Component removed"'
 
 STUB_TEMPLATE = """\
@@ -104,7 +104,7 @@ TOMBSTONE_TEMPLATE = """\
 
 
 class ScaffoldError(Exception):
-    """Any generate/sunset input problem (unknown group, existing page,
+    """Any generate/remove input problem (unknown group, existing page,
     missing nav entry, ...). :func:`main` maps it to exit code 1."""
 
 
@@ -301,7 +301,7 @@ def mark_nav_removed(lines: list[str], name: str) -> str:
     if entry is None:
         msg = (
             f"no nav entry for {page_rel} in the {NAV_SECTION} section "
-            f"of {NAV_NAME} -- sunset keeps the page navigated; add "
+            f"of {NAV_NAME} -- removal keeps the page navigated; add "
             "the entry first"
         )
         raise ScaffoldError(msg)
@@ -315,7 +315,7 @@ def mark_nav_removed(lines: list[str], name: str) -> str:
 
 
 def h1_of(page: Path) -> str:
-    """The page's first ``# `` heading line (kept verbatim by sunset)."""
+    """The page's first ``# `` heading line (kept verbatim by removal)."""
     for line in page.read_text().splitlines():
         if line.startswith("# "):
             return line
@@ -340,7 +340,7 @@ def scaffold(
     page = doc_root / page_rel
     if page.exists():
         msg = (
-            f"page exists already: {page_rel.as_posix()} -- sunset or "
+            f"page exists already: {page_rel.as_posix()} -- remove or "
             "edit it instead"
         )
         raise ScaffoldError(msg)
@@ -367,7 +367,7 @@ def scaffold(
     return page
 
 
-def sunset(name: str, doc_root: Path = DOC_ROOT) -> Path:
+def remove_page(name: str, doc_root: Path = DOC_ROOT) -> Path:
     """Replace the component page with a tombstone and mark the nav
     label ``... (removed)`` in place (see module docstring). Returns
     the tombstoned page path."""
@@ -377,7 +377,7 @@ def sunset(name: str, doc_root: Path = DOC_ROOT) -> Path:
     if (doc_root / twin_rel).is_file():
         msg = (
             f"German twin exists: {twin_rel.as_posix()} -- decide its "
-            "fate (tombstone or remove it) by hand first; sunset "
+            "fate (tombstone or remove it) by hand first; removal "
             "refuses to leave a stale translation behind"
         )
         raise ScaffoldError(msg)
@@ -396,7 +396,7 @@ def sunset(name: str, doc_root: Path = DOC_ROOT) -> Path:
 
     page.write_text(TOMBSTONE_TEMPLATE.format(h1=h1, marker=TOMBSTONE_MARKER))
     write_nav(doc_root, lines)
-    log.info("page-sunset", name=name, page=page_rel.as_posix(), h1=h1)
+    log.info("page-removed", name=name, page=page_rel.as_posix(), h1=h1)
     log.info(
         "nav-marked-removed",
         label=f"{old_label} (removed)",
@@ -424,9 +424,9 @@ def _configure_logging() -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """CLI entry: ``python -m tools.scaffold_page <name> [--sunset]``.
+    """CLI entry: ``python -m tools.scaffold_page <name> [--remove]``.
 
-    Exit codes: ``0`` (page generated or sunsets), ``1`` (input
+    Exit codes: ``0`` (page generated or removed), ``1`` (input
     problem, with the reason on stderr), ``2`` (usage error, via
     argparse).
     """
@@ -435,7 +435,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         prog="scaffold_page",
         description=(
             "Generate a component page stub (src/components/<name>.md + "
-            "nav entry) or, with --sunset, replace a page with a "
+            "nav entry) or, with --remove, replace a page with a "
             "tombstone and mark its nav label (removed)."
         ),
     )
@@ -443,7 +443,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "name", help="component slug (file name under src/components/)"
     )
     parser.add_argument(
-        "--sunset",
+        "--remove",
         action="store_true",
         help="tombstone NAME's page instead of generating one",
     )
@@ -462,17 +462,17 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    if args.sunset:
+    if args.remove:
         if args.group or args.title:
-            parser.error("--sunset takes no --group/--title")
+            parser.error("--remove takes no --group/--title")
     elif not args.group:
         parser.error(
             f"--group is required for generate mode (a {NAV_SECTION} nav group)"
         )
 
     try:
-        if args.sunset:
-            sunset(args.name, doc_root=args.doc_root)
+        if args.remove:
+            remove_page(args.name, doc_root=args.doc_root)
         else:
             scaffold(
                 args.name,

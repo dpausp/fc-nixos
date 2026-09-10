@@ -1,4 +1,4 @@
-"""Executable spec for ``tools/scaffold_page.py`` (generate + sunset).
+"""Executable spec for ``tools/scaffold_page.py`` (generate + remove).
 
 Two modes over the same two artifacts -- the markdown page under
 ``src/components/`` and the hand-maintained explicit navigation in
@@ -14,7 +14,7 @@ Two modes over the same two artifacts -- the markdown page under
   indentation of its sibling entries, including the compressed
   ``} ] },`` group-ending lines that an append has to split;
 
-- SUNSET replaces a component page with a generic tombstone (H1 +
+- REMOVE replaces a component page with a generic tombstone (H1 +
   anchor stay, warning admonition, generic switcher hint -- NO
   frontmatter/search-exclude so the page stays searchable and the
   client-side version switcher keeps offering it) and marks the nav
@@ -252,14 +252,14 @@ def test_generate_rejects_invalid_slug(mini_doc: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# sunset: tombstone + (removed) nav marker
+# remove: tombstone + (removed) nav marker
 # ---------------------------------------------------------------------------
 
 
-def test_sunset_tombstone_anatomy(mini_doc: Path) -> None:
+def test_remove_tombstone_anatomy(mini_doc: Path) -> None:
     """Tombstone keeps H1+anchor, warns generically, stays searchable."""
     with capture_logs() as logs:
-        sp.sunset("mysql", mini_doc)
+        sp.remove_page("mysql", mini_doc)
 
     text = (mini_doc / "src" / "components" / "mysql.md").read_text()
     assert text.splitlines()[0] == "# MySQL { #nixos-mysql }"
@@ -275,13 +275,13 @@ def test_sunset_tombstone_anatomy(mini_doc: Path) -> None:
 
     assert not re.search(r"\d{2}\.\d{2}", text)
     assert any(
-        e["event"] == "page-sunset" and e["name"] == "mysql" for e in logs
+        e["event"] == "page-removed" and e["name"] == "mysql" for e in logs
     )
 
 
-def test_sunset_marks_nav_label_removed_in_place(mini_doc: Path) -> None:
+def test_remove_marks_nav_label_removed_in_place(mini_doc: Path) -> None:
     """Nav label gets the (removed) marker at its existing position."""
-    sp.sunset("mysql", mini_doc)
+    sp.remove_page("mysql", mini_doc)
 
     section = components_section(parsed_nav(mini_doc))
     labels = group_labels(section, "Databases")
@@ -305,38 +305,38 @@ def test_sunset_marks_nav_label_removed_in_place(mini_doc: Path) -> None:
                 assert marked == [{"MySQL (removed)": "components/mysql.md"}]
 
 
-def test_sunset_twice_fails(mini_doc: Path) -> None:
+def test_remove_twice_fails(mini_doc: Path) -> None:
     """A second sunset of the same page fails loudly."""
-    sp.sunset("mysql", mini_doc)
+    sp.remove_page("mysql", mini_doc)
 
     with pytest.raises(sp.ScaffoldError, match="tombstone already"):
-        sp.sunset("mysql", mini_doc)
+        sp.remove_page("mysql", mini_doc)
 
 
-def test_sunset_unknown_page_fails(mini_doc: Path) -> None:
+def test_remove_unknown_page_fails(mini_doc: Path) -> None:
     with pytest.raises(sp.ScaffoldError, match="no such component page"):
-        sp.sunset("nosuchdb", mini_doc)
+        sp.remove_page("nosuchdb", mini_doc)
 
 
-def test_sunset_missing_nav_entry_fails(tmp_path: Path) -> None:
-    """A page without a Components nav entry cannot be sunset."""
+def test_remove_missing_nav_entry_fails(tmp_path: Path) -> None:
+    """A page without a Components nav entry cannot be removed."""
     nav = MINI_ZENSICAL.replace(
         '          { "MySQL" = "components/mysql.md" },\n', ""
     )
     root = write_mini_doc(tmp_path / "doc", nav=nav)
 
     with pytest.raises(sp.ScaffoldError, match="no nav entry"):
-        sp.sunset("mysql", root)
+        sp.remove_page("mysql", root)
 
 
-def test_sunset_german_twin_fails_loudly(mini_doc: Path) -> None:
-    """A German twin blocks the sunset with a remediation hint."""
+def test_remove_german_twin_fails_loudly(mini_doc: Path) -> None:
+    """A German twin blocks the removal with a remediation hint."""
     twin = mini_doc / "src" / "de" / "components" / "mysql.md"
     twin.parent.mkdir(parents=True)
     twin.write_text("# MySQL (de)\n")
 
     with pytest.raises(sp.ScaffoldError) as excinfo:
-        sp.sunset("mysql", mini_doc)
+        sp.remove_page("mysql", mini_doc)
     assert "de/components/mysql.md" in str(excinfo.value)
     # the EN page must be untouched when the tool refuses
     assert (
@@ -360,12 +360,12 @@ rev = "fc-25.11-production"
 """
 
 
-def test_sunset_keeps_page_switchable_in_payload(
+def test_remove_keeps_page_switchable_in_payload(
     tmp_path: Path,
 ) -> None:
     """Tombstone in the master + real page in the snapshot = switchable.
 
-    The payload scan is file-existence based: sunsetting (replacing
+    The payload scan is file-existence based: removal (replacing
     content, keeping the file) keeps ``components/mysql`` carried by
     the 25.11 snapshot -- exactly what the version switcher needs to
     keep offering the page. gen_platform_versions stays untouched.
@@ -376,7 +376,7 @@ def test_sunset_keeps_page_switchable_in_payload(
     snapshot.mkdir(parents=True)
     (snapshot / "mysql.md").write_text(MYSQL_PAGE)
 
-    sp.sunset("mysql", root)
+    sp.remove_page("mysql", root)
 
     versions = gpv.load_versions(root / "platform-versions.toml")
     payload = gpv.build_payload(versions, versions.stable, root / "src")
@@ -413,11 +413,11 @@ def test_main_generates_page(
     assert "nav-entry-inserted" in err
 
 
-def test_main_sunset(
+def test_main_remove(
     mini_doc: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    """:meth:`main --sunset` tombstones and marks the nav label."""
-    code = sp.main(["--sunset", "mysql", "--doc-root", str(mini_doc)])
+    """:meth:`main --remove` tombstones and marks the nav label."""
+    code = sp.main(["--remove", "mysql", "--doc-root", str(mini_doc)])
 
     assert code == 0
     text = (mini_doc / "src" / "components" / "mysql.md").read_text()
@@ -425,11 +425,11 @@ def test_main_sunset(
     section = components_section(parsed_nav(mini_doc))
     assert "MySQL (removed)" in group_labels(section, "Databases")
     err = capsys.readouterr().err
-    assert "page-sunset" in err
+    assert "page-removed" in err
     assert "nav-marked-removed" in err
 
 
-def test_main_requires_group_without_sunset(
+def test_main_requires_group_without_remove(
     mini_doc: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     """Generate mode without --group is a usage error (exit 2)."""
