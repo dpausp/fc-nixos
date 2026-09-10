@@ -10,74 +10,23 @@ both backends, and the matched-entry selection order
 
 from __future__ import annotations
 
-import os
-import subprocess
 from pathlib import Path
 
 import pytest
 from structlog.testing import capture_logs
+from tests.helpers import (
+    TOML_NEW_DOCS as TOML,
+    git,
+    git_env,
+    hg,
+    put,
+    versions_file,
+)
 from tools import checkout_versioned_docs as cot
 from tools import vcs_backend as vcs
 from tools.gen_platform_versions import load_versions
 
-TOML = """\
-[stable]
-ver = "26.05"
-rev = "new-docs-fc-26.05-production"
-
-[[prerelease]]
-ver = "26.11"
-rev = "new-docs-master"
-
-[[sunsetting]]
-ver = "25.11"
-rev = "new-docs-fc-25.11-production"
-"""
-
 MISSING_BRANCH = "no-such-mirror-branch"
-
-
-def put(root: Path, rel: str, text: str = "# page\n") -> None:
-    page = root / rel
-    page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(text)
-
-
-def hg(repo: Path, *args: str) -> str:
-    proc = subprocess.run(
-        ["hg", *args], cwd=repo, capture_output=True, text=True, check=False
-    )
-    assert proc.returncode == 0, f"hg {args} failed: {proc.stderr}"
-    return proc.stdout
-
-
-def git_env() -> dict[str, str]:
-    env = dict(os.environ)
-    env.update(
-        GIT_AUTHOR_NAME="t",
-        GIT_AUTHOR_EMAIL="t@example.invalid",
-        GIT_COMMITTER_NAME="t",
-        GIT_COMMITTER_EMAIL="t@example.invalid",
-    )
-    return env
-
-
-def git(repo: Path, *args: str) -> str:
-    proc = subprocess.run(
-        ["git", "-C", str(repo), *args],
-        capture_output=True,
-        text=True,
-        check=False,
-        env=git_env(),
-    )
-    assert proc.returncode == 0, f"git {args} failed: {proc.stderr}"
-    return proc.stdout
-
-
-def versions_file(tmp_path: Path, name: str = "platform-versions.toml") -> Path:
-    path = tmp_path / name
-    path.write_text(TOML)
-    return path
 
 
 @pytest.fixture

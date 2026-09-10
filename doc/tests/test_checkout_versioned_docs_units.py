@@ -9,11 +9,11 @@ placement pipeline's content-fix wiring on a minimal hg fixture.
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
 from structlog.testing import capture_logs
+from tests.helpers import hg
 from tools.checkout_versioned_docs import (
     MANIFEST_NAME,
     STATUS_CLAUSE,
@@ -164,14 +164,6 @@ def test_status_clause_covers_snapshot_statuses() -> None:
     wording may say 'sunsetting'."""
     assert set(STATUS_CLAUSE) == {"stable", "sunsetting"}
     assert "sunsetting" not in STATUS_CLAUSE["stable"]
-
-
-def hg(repo: Path, *args: str) -> str:
-    proc = subprocess.run(
-        ["hg", *args], cwd=repo, capture_output=True, text=True, check=False
-    )
-    assert proc.returncode == 0, f"hg {args} failed: {proc.stderr}"
-    return proc.stdout
 
 
 OLD_BANNER_PAGE = (

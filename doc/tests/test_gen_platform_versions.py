@@ -37,30 +37,10 @@ from pathlib import Path
 
 import pytest
 from structlog.testing import capture_logs
+from tests.helpers import TOML_FC as TOML, hg, put
 from tools import gen_platform_versions as gpv
 
 DOC = Path(__file__).resolve().parents[1]
-
-TOML = """\
-[stable]
-ver = "26.05"
-rev = "fc-26.05-production"
-
-[[prerelease]]
-ver = "26.11"
-rev = "fc-26.11-dev"
-
-[[sunsetting]]
-ver = "25.11"
-rev = "fc-25.11-production"
-"""
-
-
-def put(root: Path, rel: str) -> None:
-    """Create ``root/<rel>`` as a markdown page (parents as needed)."""
-    page = root / rel
-    page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text("# page\n")
 
 
 @pytest.fixture
@@ -337,14 +317,6 @@ def test_load_versions_rejects_invalid_toml(
 
     with pytest.raises(ValueError, match=message):
         gpv.load_versions(versions)
-
-
-def hg(repo: Path, *args: str) -> str:
-    proc = subprocess.run(
-        ["hg", *args], cwd=repo, capture_output=True, text=True, check=False
-    )
-    assert proc.returncode == 0, f"hg {args} failed: {proc.stderr}"
-    return proc.stdout
 
 
 @pytest.fixture

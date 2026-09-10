@@ -283,3 +283,45 @@ def test_slimming_relocations_are_page_scoped() -> None:
 
     assert count == 1
     assert "[the backup documentation](../../infrastructure/backup.md)" in fixed
+
+
+def test_strips_handoff_placeholder_banner() -> None:
+    """The production branches hand off the sunsetting banner with an
+    UNSUBSTITUTED Jinja placeholder: the per-page URL only exists after
+    placement, so ``{{ stable_url }}`` must never survive into a
+    snapshot. fix_text strips the exact handoff line restlos (both
+    lines plus the trailing blank) BEFORE process_snapshot re-adds the
+    status-correct banner."""
+    banner = (
+        "!!! warning\n"
+        "    This is a sunsetting version of the platform documentation."
+        " Go to [the stable version]({{ stable_url }}) for optimized"
+        " support.\n"
+    )
+    marker = "Body marker line below the banner.\n"
+
+    fixed, count = fix_text("# Page\n\n" + banner + "\n" + marker)
+
+    assert "{{ stable_url }}" not in fixed
+    assert "!!! warning" not in fixed
+    assert fixed == "# Page\n\n" + marker
+    assert count == 1  # banner only: no FIXES entry matches this page
+
+
+def test_banner_strip_is_label_agnostic() -> None:
+    """The same banner shape with an alternative link label (the
+    degenerate pre-migration ``[the current version]()``, empty target)
+    is stripped completely as well."""
+    alt_banner = (
+        "!!! warning\n"
+        "    This is a sunsetting version of the platform documentation."
+        " Go to [the current version]() for optimized support.\n"
+    )
+    marker = "Body marker line below the banner.\n"
+
+    fixed, count = fix_text("# Page\n\n" + alt_banner + "\n" + marker)
+
+    assert "!!! warning" not in fixed
+    assert "This is a sunsetting version" not in fixed
+    assert fixed == "# Page\n\n" + marker
+    assert count == 1

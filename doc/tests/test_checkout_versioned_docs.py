@@ -37,38 +37,10 @@ import sys
 from pathlib import Path
 
 import pytest
+from tests.helpers import TOML_FC as TOML, hg, put
 from tools import checkout_versioned_docs as cot
-from tools.snapshot_content_fixes import fix_text
 
 DOC = Path(__file__).resolve().parents[1]
-
-TOML = """\
-[stable]
-ver = "26.05"
-rev = "fc-26.05-production"
-
-[[prerelease]]
-ver = "26.11"
-rev = "fc-26.11-dev"
-
-[[sunsetting]]
-ver = "25.11"
-rev = "fc-25.11-production"
-"""
-
-
-def put(root: Path, rel: str, text: str = "# page\n") -> None:
-    page = root / rel
-    page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(text)
-
-
-def hg(repo: Path, *args: str) -> str:
-    proc = subprocess.run(
-        ["hg", *args], cwd=repo, capture_output=True, text=True, check=False
-    )
-    assert proc.returncode == 0, f"hg {args} failed: {proc.stderr}"
-    return proc.stdout
 
 
 @pytest.fixture
@@ -476,48 +448,6 @@ def test_placement_applies_content_fixes(
     assert "platform-releases/" not in text
     assert "This is a sunsetting version" not in text
     assert "](../platform/local.md#nixos-local)" in text
-
-
-def test_fix_text_strips_handoff_placeholder_banner() -> None:
-    """The production branches hand off the sunsetting banner with an
-    UNSUBSTITUTED Jinja placeholder: the per-page URL only exists after
-    placement, so ``{{ stable_url }}`` must never survive into a
-    snapshot. fix_text strips the exact handoff line restlos (both
-    lines plus the trailing blank) BEFORE process_snapshot re-adds the
-    status-correct banner."""
-    banner = (
-        "!!! warning\n"
-        "    This is a sunsetting version of the platform documentation."
-        " Go to [the stable version]({{ stable_url }}) for optimized"
-        " support.\n"
-    )
-    marker = "Body marker line below the banner.\n"
-
-    fixed, count = fix_text("# Page\n\n" + banner + "\n" + marker)
-
-    assert "{{ stable_url }}" not in fixed
-    assert "!!! warning" not in fixed
-    assert fixed == "# Page\n\n" + marker
-    assert count == 1  # banner only: no FIXES entry matches this page
-
-
-def test_fix_text_banner_strip_is_label_agnostic() -> None:
-    """The same banner shape with an alternative link label (the
-    degenerate pre-migration ``[the current version]()``, empty target)
-    is stripped completely as well."""
-    alt_banner = (
-        "!!! warning\n"
-        "    This is a sunsetting version of the platform documentation."
-        " Go to [the current version]() for optimized support.\n"
-    )
-    marker = "Body marker line below the banner.\n"
-
-    fixed, count = fix_text("# Page\n\n" + alt_banner + "\n" + marker)
-
-    assert "!!! warning" not in fixed
-    assert "This is a sunsetting version" not in fixed
-    assert fixed == "# Page\n\n" + marker
-    assert count == 1
 
 
 def test_old_stable_snapshot_gets_banner_and_exclude(

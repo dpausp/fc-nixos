@@ -13,41 +13,13 @@ namespaced-export behavior itself is what is under test).
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
 import pytest
+from tests.helpers import TOML_FC as TOML, hg, put
 from tools import checkout_versioned_docs as cot
 from tools import gen_platform_versions as gpv
 from tools import vcs_backend as vcs
-
-TOML = """\
-[stable]
-ver = "26.05"
-rev = "fc-26.05-production"
-
-[[prerelease]]
-ver = "26.11"
-rev = "fc-26.11-dev"
-
-[[sunsetting]]
-ver = "25.11"
-rev = "fc-25.11-production"
-"""
-
-
-def put(root: Path, rel: str, text: str = "# page\n") -> None:
-    page = root / rel
-    page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(text)
-
-
-def hg(repo: Path, *args: str) -> str:
-    proc = subprocess.run(
-        ["hg", *args], cwd=repo, capture_output=True, text=True, check=False
-    )
-    assert proc.returncode == 0, f"hg {args} failed: {proc.stderr}"
-    return proc.stdout
 
 
 @pytest.fixture
