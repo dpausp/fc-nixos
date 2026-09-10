@@ -1,18 +1,14 @@
 # Flying Circus Platform Documentation
 
 This directory builds the public manual of the Flying Circus NixOS
-platform: infrastructure, operations, roles, API, and release notes.
-The documentation lives inside the `fc-nixos` monorepo, so `doc/src/`
-always matches the OS code of the current branch.
+platform, infrastructure, components, Directory API, and changelog.
+The documentation lives inside the `fc-nixos` repo, so `doc/src/`
+always matches the code of the current platform branch.
 
 Where the result is served:
 
 - Production: <https://docs.flyingcircus.io> (built from the default branch)
 - Staging: <https://doc.fcdocstag.fcio.net>
-
-This README is for documentation contributors; publishing the built
-HTML is outside this repo's CI, which only builds and uploads an
-artifact.
 
 ## Tech
 
@@ -30,7 +26,7 @@ artifact.
   the snapshot banners emit `.md` links; see below)
 - Build tooling via [appenv](https://github.com/flyingcircusio/appenv):
   a single-file Python tool that pins the environment from
-  `pyproject.toml` / `uv.lock` (`.appenv/venv`, symlinked as `.venv`)
+  `pyproject.toml` / `uv.lock`.
 
 ## Development
 
@@ -68,6 +64,7 @@ make    # checkout-versioned-docs -> gen-platform-versions -> html
 
 ```bash
 ./zensical build
+./zensical serve
 ./appenv python -m tools.checkout_versioned_docs
 ./appenv python -m tools.gen_platform_versions
 ./appenv python -m tools.scaffold_page ...     # see "Adding a component page"
@@ -146,7 +143,7 @@ model for banners):
         The <component> role is in sunsetting. ...
 
 Pages include a snippet right below their H1 via
-`--8<-- "sunsetting-<component>.md"` (`pymdownx.snippets` with
+`--8<-- "<snippet_name>.md"` (`pymdownx.snippets` with
 `base_path = "snippets"` and `check_paths = true`; see `zensical.toml`
 for the warm-cache caveat -- snippet edits surface on cold builds
 only).
@@ -155,9 +152,8 @@ What does **not** belong there: near-variants (snippets cannot be
 parameterized -- one file per variant or no snippet at all), release
 notes (frozen history), and the generated snapshot trees under
 `src/<ver>/` (their banners are injected by
-`tools/checkout_versioned_docs.py`). `tests/test_snippets.py` guards
-both directions: every include must resolve to an existing snippet,
-and no snippet may be orphaned.
+`tools/checkout_versioned_docs.py`). 
+
 
 ### Release notes
 
@@ -309,10 +305,6 @@ cd doc
 uv run pytest tests
 ```
 
-(~190 tests; `uv run` syncs the `dev` dependency group -- a bare
-`./appenv python -m pytest` fails because the appenv venv has no
-pytest.)
-
 | Suite | Pins |
 | --- | --- |
 | `test_checkout_versioned_docs.py` (+ `_units`) | placement contract: matched-rev selection, snapshot shapes, banner, index stubs, skip/redo |
@@ -325,6 +317,3 @@ pytest.)
 | `test_docs_workflow.py` | CI workflow action pins |
 | `test_release_notes.py`, `test_gen_changes_index.py`, `test_scaffold_page.py`, `test_vcs_backend.py` | tool units |
 
-Change-first: to change the switcher payload shape or placement
-behavior, change the pinning test first -- the suite fails loudly
-until the implementation matches.
