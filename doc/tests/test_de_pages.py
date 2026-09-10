@@ -27,8 +27,8 @@ from pathlib import Path
 
 import pytest
 import tomllib
+from tests.helpers import DOC_ROOT as DOC
 
-DOC = Path(__file__).resolve().parents[1]
 SRC = DOC / "src"
 DE = SRC / "de"
 CONFIG = DOC / "zensical.toml"

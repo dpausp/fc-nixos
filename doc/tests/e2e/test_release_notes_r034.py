@@ -21,11 +21,9 @@ from pathlib import Path
 
 import pytest
 from pytest_readable import readable
+from tests.helpers import DOC_ROOT, REPO_ROOT
 from tools import gen_changes_index as gci
 from tools import release_notes as rn
-
-DOC_ROOT = Path(__file__).resolve().parents[2]
-REPO_ROOT = DOC_ROOT.parent
 
 RELEASE = "2026_034"
 PUBLISH_DATE = "2026-08-24"  # the Monday after r033's 2026-08-17

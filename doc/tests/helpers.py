@@ -58,6 +58,13 @@ def git(repo: Path, *args: str) -> str:
 # (checkout / active-bookmark / switcher-generator suites) and the
 # production mirror-branch names (vcs-backend / release-notes suites).
 
+# Tier-independent roots: ONE definition site instead of per-file
+# parents[N] counting, where N silently means different directories
+# per test tier (doc/tests/ vs doc/tests/e2e/). Naming follows the
+# production tools (doc/tools/*.py DOC_ROOT).
+DOC_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = DOC_ROOT.parent
+
 TOML_FC = """\
 [stable]
 ver = "26.05"

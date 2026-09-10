@@ -15,7 +15,9 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-SRC = Path(__file__).resolve().parent.parent / "src"
+from tests.helpers import DOC_ROOT
+
+SRC = DOC_ROOT / "src"
 
 # markdown link/image targets: [text](target) and ![alt](target)
 TARGET_RE = re.compile(r"\]\(([^)\s]+)\)")

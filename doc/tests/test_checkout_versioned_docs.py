@@ -37,10 +37,8 @@ import sys
 from pathlib import Path
 
 import pytest
-from tests.helpers import TOML_FC as TOML, hg, put
+from tests.helpers import DOC_ROOT as DOC, TOML_FC as TOML, hg, put
 from tools import checkout_versioned_docs as cot
-
-DOC = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture

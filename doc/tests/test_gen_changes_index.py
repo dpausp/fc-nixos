@@ -32,9 +32,8 @@ import sys
 from pathlib import Path
 
 from pytest_readable import readable
+from tests.helpers import DOC_ROOT as DOC
 from tools import gen_changes_index as gci
-
-DOC = Path(__file__).resolve().parents[1]
 
 PAGE_TMPL = """---
 Publish Date: '{date}'

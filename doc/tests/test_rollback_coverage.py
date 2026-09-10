@@ -25,10 +25,9 @@ from pathlib import Path
 
 import pytest
 
+from tests.helpers import REPO_ROOT as REPO
 from tools import checkout_versioned_docs as cot
 from tools.vcs_backend import active_bookmark
-
-REPO = Path(__file__).resolve().parents[2]
 
 # Dead-era artifacts the fix table must clear on placement.
 DEAD_MARKERS = (

@@ -15,8 +15,7 @@ from pathlib import Path
 
 import tomllib
 from pytest_readable import readable
-
-DOC = Path(__file__).resolve().parents[1]
+from tests.helpers import DOC_ROOT as DOC
 
 SECURITY_PAGES = [
     "security/data-protection.md",

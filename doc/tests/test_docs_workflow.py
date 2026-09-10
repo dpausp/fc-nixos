@@ -13,11 +13,10 @@ to a ``v``-prefixed ref (major tag or exact version).
 from __future__ import annotations
 
 import re
-from pathlib import Path
 
-WORKFLOW = (
-    Path(__file__).resolve().parents[2] / ".github" / "workflows" / "docs.yml"
-)
+from tests.helpers import REPO_ROOT
+
+WORKFLOW = REPO_ROOT / ".github" / "workflows" / "docs.yml"
 
 
 def refs(action: str, text: str) -> list[str]:

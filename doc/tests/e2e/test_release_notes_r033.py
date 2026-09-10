@@ -26,12 +26,10 @@ from pathlib import Path
 
 import pytest
 from pytest_readable import readable
+from tests.helpers import DOC_ROOT, REPO_ROOT
 from tools import gen_changes_index as gci
 from tools import release_notes as rn
 from tools.vcs_backend import VcsError
-
-DOC_ROOT = Path(__file__).resolve().parents[2]
-REPO_ROOT = DOC_ROOT.parent
 
 # The persistent git mirror the /doc fetch pipeline maintains
 # (blob-less partial clone; the blobs this test needs are cached).
