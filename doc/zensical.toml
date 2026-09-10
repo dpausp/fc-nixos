@@ -12,9 +12,7 @@
 # linked in the sidebar (probed: zensical emits no warning for unlisted
 # pages): index.md (the manual index -- reached via the logo/site-title
 # links instead of a redundant nav entry), devopsguide-de.md (linked from
-# dead media, do not rename), support/chat.md and
-# support/shared-screen-sessions.md (redirect stubs to overview.md, so
-# snapshot banners and old bookmarks keep working), and the German tree de/**
+# dead media, do not rename), and the German tree de/**
 # (translated pages for links in official German documents -- directories
 # mirror URLs: src/de/<path>.md serves at /de/<path>/; each page
 # cross-links its English twin; tests/test_de_pages.py pins ref
@@ -74,7 +72,11 @@ nav = [
           "security/policy.md",
           "security/software-vulnerabilities.md"
       ] },
-      { "Support" = "support/overview.md" }
+      { "Support" = [
+          "support/chat.md",
+          "support/overview.md",
+          "support/shared-screen-sessions.md"
+      ] }
   ] },
   { "Infrastructure" = [
       { "Getting started" = "infrastructure/getting-started.md" },

@@ -26,6 +26,12 @@ SECURITY_PAGES = [
     "security/software-vulnerabilities.md",
 ]
 
+SUPPORT_PAGES = [
+    "support/chat.md",
+    "support/overview.md",
+    "support/shared-screen-sessions.md",
+]
+
 
 @readable(
     intention="General ist erste Nav-Gruppe mit Changelog-Latest-Link, Security, Support",
@@ -52,7 +58,7 @@ def test_nav_general_shape() -> None:
     assert re.fullmatch(r"changes/\d{4}/r\d{3}\.md", target)
     assert (DOC / "src" / target).is_file()
     assert children[1] == {"Security": SECURITY_PAGES}
-    assert children[2] == {"Support": "support/overview.md"}
+    assert children[2] == {"Support": SUPPORT_PAGES}
     assert list(nav[1]) == ["Infrastructure"]
 
 
