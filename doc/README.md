@@ -71,13 +71,6 @@ make    # checkout-versioned-docs -> gen-platform-versions -> html
 ./appenv python -m tools.release_notes ...     # see "Release notes"
 ```
 
-The test suite needs the `dev` dependency group and runs through uv
-(`./appenv python -m pytest` fails -- the appenv venv has no pytest):
-
-```bash
-uv run pytest tests                            # see "Tests"
-```
-
 ## Writing documentation
 
 ### Tree layout
