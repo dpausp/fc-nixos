@@ -72,7 +72,7 @@ nav = [
           "security/policy.md",
           "security/software-vulnerabilities.md"
       ] },
-      { "Support" = "support/overview.md" }
+      { "Support" = "support.md" }
   ] },
   { "Infrastructure" = [
       { "Getting started" = "infrastructure/getting-started.md" },

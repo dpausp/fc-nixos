@@ -31,7 +31,7 @@ provided which helps many clients to configure themselves properly.
     has many moving parts which could interfere with roles and applications.
 
 First, you need a public IPv4 and IPv6 address for your mail server's frontend
-interface. Contact our [support](../support/index.md#support) if you don't
+interface. Contact our [support](../support.md) if you don't
 have any.
 Then, pick a host to serve mails from. This host will be advertised via the MX
 record on your domain. You could for example choose `mail.example.com` to handle mail
@@ -51,7 +51,7 @@ same time and imprint cannot be used if you serve webmail under the
 
 !!! warning
     Incorrect DNS setup is the most frequent source of delivery problems. Let our
-    [support](../support/index.md#support) check your setup if in doubt.
+    [support](../support.md) check your setup if in doubt.
 
 If you choose to use the Roundcube webmail UI by adding the `webmailHost`
 setting like in the example, make sure to enable a `postgresql` role on the

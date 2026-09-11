@@ -389,7 +389,7 @@ with dedicated authentication credentials.
 
 ## Other measures
 
-- Our support process and incident response measures are documented at [the support overview](../support/overview.md#support-details).
+- Our support process and incident response measures are documented at [the support overview](../support.md#support-details).
 - We have a process for emergency and crisis management including contingency plans for critical business processes (business continuity). See also [disaster-recovery](disaster-recovery.md#disaster-recovery).
 
 #### Footnotes

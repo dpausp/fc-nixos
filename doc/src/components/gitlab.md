@@ -3,7 +3,7 @@
 Managed instance of [Gitlab](https://gitlab.com/about), an end-to-end code forge, built-in version control, issue tracking, code review, CI/CD, and more.
 
 Gitlab is a complex piece of software which we do not recommend you to approach on your own. We assume that all installations of the Gitlab role are managed by or coordinated with Flyingcircus staff.
-Please contact our [support](../support/index.md#support) for deploying a new Gitlab instance.
+Please contact our [support](../support.md) for deploying a new Gitlab instance.
 
 ## Telemetry and user tracking { #nixos-gitlab-tracking }
 

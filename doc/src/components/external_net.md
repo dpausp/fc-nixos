@@ -18,7 +18,7 @@ requires that users connecting to the gateway have a valid login for this RG.
 ### VxLAN
 
 The external network gateway also contains provisions to interconnect the local
-RG with a remote network via [VxLAN]. Contact our [support](../support/index.md#support) for details.
+RG with a remote network via [VxLAN]. Contact our [support](../support.md) for details.
 
 ### mosh
 
@@ -29,7 +29,7 @@ As a courtesy, external network gateways run a [mosh] server by default.
 ### OpenVPN
 
 An OpenVPN server needs correct DNS settings (forward and reverse names).
-Contact the [support](../support/index.md#support) to get this set up. Additional options (like address
+Contact the [support](../support.md) to get this set up. Additional options (like address
 pools) can be set in `/etc/local/openvpn/networks.json`. The README file
 in the same directory contains a detailed description of available options.
 

@@ -437,7 +437,7 @@ dedizierten Authentifizierungsdaten getrennt.
 
 ## Andere Maßnahmen
 
-- Unser Supportprozess und die Maßnahmen zur Reaktion auf Vorfälle sind unter [Support-Details](../../support/overview.md#support-details) dokumentiert.
+- Unser Supportprozess und die Maßnahmen zur Reaktion auf Vorfälle sind unter [Support-Details](../../support.md#support-details) dokumentiert.
 - Wir haben einen Prozess für Notfall- und Krisenmanagement einschließlich Notfallplänen für kritische Geschäftsprozesse (Business Continuity). Siehe auch [Disaster recovery](../../security/disaster-recovery.md#disaster-recovery).
 
 #### Fußnoten

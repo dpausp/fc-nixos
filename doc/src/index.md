@@ -35,7 +35,7 @@ Our **supported release window** covers three versions aligned with NixOS upstre
 
 ## Support & Operations
 
-**Need help with your setup or running into an issue?** Whether it's a general question, daily project chat via Matrix, or an urgent production incident, find all contact channels, SLA response times, and emergency hotline details in our **[Support Guide](./support/overview.md)**.
+**Need help with your setup or running into an issue?** Whether it's a general question, daily project chat via Matrix, or an urgent production incident, find all contact channels, SLA response times, and emergency hotline details in our **[Support Guide](./support.md)**.
 
 * **Ticket Support:** Email [support@flyingcircus.io](mailto:support@flyingcircus.io)
 * **Phone Support:** +49 345 219401-0
