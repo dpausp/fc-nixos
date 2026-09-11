@@ -67,9 +67,8 @@ An incident ticket is created automatically regardless of how the emergency is r
 
 
 !!! warning "Standby Availability Hours"
-    The standby support is *only* notified during the hours booked
-    according to the SLA.
----
+    The standby support is *only* notified during the hours booked according to the SLA.
+    
 
 ## Chat
 For daily communication in ongoing projects we also offer the opportunity to chat with us. We decided to base our system upon the Matrix-protocol by hosting our own homeserver for every of our users. We do also provide a self-hosted and pre-configurated version of Element to allow easy access. However, alternative clients are allowed and welcomed to use.
@@ -91,7 +90,7 @@ If you want to use your own client, please find the needed information below:
 
 ---
 
-## Shared screen sessions
+## Shared screen sessions { #screen-multiuser }
 
 The multiuser session feature of GNU screen comes handy if a user needs remote assistance. Multiuser sessions allow other users to join in a running screen session. They see the same terminal output as the inviting user and are able to type in commands.
 
