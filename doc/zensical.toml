@@ -72,11 +72,7 @@ nav = [
           "security/policy.md",
           "security/software-vulnerabilities.md"
       ] },
-      { "Support" = [
-          "support/chat.md",
-          "support/overview.md",
-          "support/shared-screen-sessions.md"
-      ] }
+      { "Support" = "support/overview.md" }
   ] },
   { "Infrastructure" = [
       { "Getting started" = "infrastructure/getting-started.md" },
