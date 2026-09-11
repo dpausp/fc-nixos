@@ -1,7 +1,3 @@
----
-global_sync_id: "v1"
----
-
 % last review: 2026-05-07
 
 % review schedule: 1 year
@@ -23,6 +19,8 @@ For each scenario we give:
 - the recovery action
 - the recovery time and recovery point objective
 - measures we take to prevent the scenario
+
+---
 
 ## Terminology
 

@@ -165,6 +165,9 @@ nav = [
           { "NFS" = "components/nfs.md" } ] }
   ] }
 ]
+[theme]
+name = "modern"
+variant = "slate"
 
 [project.theme]
 language = "en"

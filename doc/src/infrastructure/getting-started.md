@@ -1,40 +1,31 @@
----
-global_sync_id: "v1"
----
-
-![](../../images/vorteile250.png){ .logo }
+![](../../images/vorteile250.png){ align=right }
 
 # Getting started { #firststeps }
 
-Welcome to the Flying Circus!
+## Welcome to the Flying Circus!
 
-For this tutorial we assume that you have ordered a virtual machine and we
+For this guide we assume that you have ordered a virtual machine and we
 finished provisioning it for you.
 
 To get you started we would like to take you on a quick tour:
 
-## Projects
 
-When you ordered a virtual machine, we asked you for a project name. Let's
-assume your project is called `myapp`. Based on this we gave your first virtual
-machine the name `myapp00`. This way you are ready to add more resources to
-your project when needed without having to invent further names. Additional
-virtual machines will be called subsequently: `myapp01`, `myapp02`, and so on.
+## Getting Access
 
-At Flying Circus we use projects to describe that a set of resources (virtual machines) that belong together and have some common settings (like user permissions, firewalling, etc.).
-
-## User Accounts
+### User Accounts
 
 To access any virtual machine in the Flying Circus, you need a personal user
 account. This account will automatically synchronize over all your virtual
 machines. Accounts are free, so don't hesitate to create them as you need them!
 
-To create your account, simply go to https://my.flyingcircus.io/signup and fill
-out the form. You will then receive an email in which you will be asked to
-verify your account. Please do so.
+To create your account:
 
-Once the verification is done, we get notified about your account creation
-automatically and will get in touch with you.
+1. Go to [my.flyingcircus.io/login](https://my.flyingcircus.io/login){:target="_blank"}.
+2. Navigate to **Register** and fill out the form.
+3. You will receive an email asking you to verify your account. Please confirm the verification link.
+
+Once the verification is done, we get notified about your account creation automatically and will get in touch with you.
+
 
 !!! note
     The user account is for maintenance purposes only. Do not consider to
@@ -42,7 +33,7 @@ automatically and will get in touch with you.
     features are not available. For information in how to deploy you application
     check the [application-deployment-intro](#application-deployment-intro) section in this tutorial.
 
-## SSH Login
+### SSH Login
 
 Virtual machines can be accessed by simply using SSH.
 
@@ -54,25 +45,36 @@ provided us when establishing your account.
     [data protection plan](../../security/data-protection.md#entry-control).
 
 Every virtual machine will have a DNS name that follows the pattern
-`<virtualmachine>.gocept.net`. For example, if your resource
+`<virtualmachine>.fcio.net`. For example, if your resource
 group is called `myapp` the first virtual machine will be known as
-`myapp00.gocept.net`.
+`myapp00.fcio.net`.
 
 ```
-$ ssh myuser@myapp00.gocept.net
+$ ssh myuser@myapp00.fcio.net
 ```
 
 Based on your SSH login you can also transfer files from and to the virtual
 machine using SFTP:
 
 ```
-$ scp my-file myuser@myapp00.gocept.net:
+$ scp my-file myuser@myapp00.fcio.net:
 ```
 
 !!! warning
     If you have problems connecting to the VM, check our section on
     [connecting](networking/connecting.md#connecting).
 
+## Projects & Resource Naming
+
+When you ordered a virtual machine, we asked you for a project name. Let's
+assume your project is called `myapp`. Based on this we gave your first virtual
+machine the name `myapp00`. This way you are ready to add more resources to
+your project when needed without having to invent further names. Additional
+virtual machines will be called subsequently: `myapp01`, `myapp02`, and so on.
+
+At Flying Circus we use projects to describe that a set of resources (virtual machines) that belong together and have some common settings (like user permissions, firewalling, etc.).
+
+---
 ## Application Deployment { #application-deployment-intro }
 
 Server applications should be running in a *service user* account and not in a
@@ -98,7 +100,7 @@ account concept can be found in the [useraccounts](../../platform/users/index.md
 
 For a detailed application deployment walk-through, please ref to the
 [application-deployment](../../platform/deployment/index.md#application-deployment) section.
-
+---
 ## Anatomy of a Virtual Machine
 
 ### Network
@@ -171,11 +173,12 @@ vdb
 
 : is the swap partition. It is generally half the amount of RAM, but at
   least 1GiB.
-
+---
 ## Managed Components
 
-You can use our managed components/roles to avoid having to install and maintain
-complex setups yourself. Some examples for components we provide:
+Components (roles) are preconfigured, automated service modules managed by Flying Circus on our NixOS-based cloud platform. They serve as building blocks for assembling complex, scalable, and production-ready application environments. Rather than manually installing, configuring, and maintaining software components, developers and administrators can leverage these roles to declaratively provision the desired infrastructure. In projects with a Managed or Guided service level, certain component roles directly impact billing and are therefore marked with a symbol (⚙︎) in the [my.flyingcircus.io portal](https://my.flyingcircus.io/){:target="_blank"}.
+
+Some examples for components we provide:
 
 - postgresql
 - mysql
@@ -195,11 +198,10 @@ For details on available software, have a look at
 the current NixOS platform documentation.
 
 You can see and change the managed components/roles for your VMs by visiting the
-[My Flying Circus](https://my.flyingcircus.io) and selecting
+[my.flyingcircus.io](https://my.flyingcircus.io/){:target="_blank"} and selecting
 the respective VM. Applied components are listed in the box labeled with
 `Configuration`.
 
 ## Access to Monitoring
 
-Virtual machines are monitored by [Sensu](https://sensu.io) for correct operation.
-Check results are displayed on the status pages at [My Flying Circus](https://my.flyingcircus.io).
+Virtual machines are monitored by [Sensu](https://sensu.io){:target="_blank"} for correct operation. Check results are displayed on the status pages at [My Flying Circus](https://my.flyingcircus.io){:target="_blank"}.
