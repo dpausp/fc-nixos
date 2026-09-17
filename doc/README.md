@@ -10,6 +10,41 @@ Where the result is served:
 - Production: <https://docs.flyingcircus.io> (built from the default branch)
 - Staging: <https://doc.fcdocstag.fcio.net>
 
+## HTTP caching requirements
+
+The web server in front of these sites must send explicit `Cache-Control`
+headers. Zensical (as of 0.0.60) puts content hashes only into the
+filenames of its own theme bundle (`/assets/stylesheets/**`,
+`/assets/javascripts/**`; the favicon under `/assets/images/` is NOT
+hashed) -- every site-owned asset from `extra_css`/`extra_javascript`
+(all of `_static/`, including the generated `platform-versions.js`), the
+HTML pages, and `feed_rss.xml` are emitted without cache busting
+(upstream: zensical/backlog#139, accepted but unbuilt).
+
+| Path class | Header |
+| --- | --- |
+| `/assets/stylesheets/**`, `/assets/javascripts/**` (hashed theme bundle) | `Cache-Control: public, max-age=31536000, immutable` |
+| everything else (`*.html`, `/_static/**`, `/feed_rss.xml`, images incl. `/assets/images/**`) | `Cache-Control: no-cache` |
+
+`no-cache` means "store, but revalidate on every use" via ETag or
+Last-Modified (keep both enabled -- nginx defaults for static files); it
+is not `no-store`. Reference for nginx:
+
+```nginx
+location ^~ /assets/stylesheets/ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+location ^~ /assets/javascripts/ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+}
+location / {
+    add_header Cache-Control "no-cache";
+}
+```
+
+Once zensical ships content hashes for `extra_css`/`extra_javascript`
+(zensical/backlog#139), `/_static/**` can move to `immutable` as well.
+
 ## Tech
 
 - [Zensical](https://github.com/flyingcircusio/zensical) (Rust core,
