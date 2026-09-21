@@ -79,11 +79,11 @@ nav = [
       { "VMs" = "infrastructure/vms.md" },
       { "AI & ML" = "infrastructure/ai-ml.md" },
       { "Networking" = [
-          "infrastructure/networking/connecting.md",
-          "infrastructure/networking/redundant-router.md",
-          "infrastructure/networking/firewall.md",
           "infrastructure/networking/networking.md",
-          "infrastructure/networking/outbound.md"
+          "infrastructure/networking/connecting.md",
+          "infrastructure/networking/firewall.md",
+          "infrastructure/networking/outbound.md",
+          "infrastructure/networking/redundant-router.md"
       ] },
       { "Block Storage" = "infrastructure/block-storage.md" },
       { "Object Storage" = "infrastructure/object-storage.md" },

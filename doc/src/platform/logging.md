@@ -1,6 +1,6 @@
 # Logging { #nixos-logging }
 
-![](images/logging250.png){ .logo }
+![](../images/logging250.png)
 
 Creating, storing, and analysing logs from components and your application is
 an important part of keeping your service healthy and developing it further.

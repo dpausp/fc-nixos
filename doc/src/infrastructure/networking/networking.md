@@ -10,11 +10,22 @@ global_sync_id: "v1"
 % ISMSControl: 8.22
 
 
-# Overview { #networking-overview }
+# Networking Overview { #networking-overview }
+
+## Topics & Guides
+
+For detailed procedures, configuration details, and architecture specifications, refer to the following guides:
+
+- [Connecting to VMs](connecting.md) – SSH access options via the `SRV` network, handling IPv4/IPv6 dual-stack scenarios, and workarounds.
+- [Firewall Concept](firewall.md) – Interface-based access control (`FE` vs. `SRV`), inter-machine project communication, and inbound exceptions.
+- [Outbound Connectivity](outbound.md) – Egress routing from VMs, direct IPv6/IPv4 communication, and datacenter NAT source addresses.
+- [Redundant Routers](redundant-router.md) – Router failover architecture, primary/secondary modes, and BGP dynamic gateway routing.
+
+---
 
 ## Physical networks
 
-![](physical.png)
+![](physical.png){ align=right }
 
 We use a redundant routed layer 3 network as the basis of production network
 functions in all our public datacenters. All of our servers in each location are
@@ -42,9 +53,10 @@ The routers participate in the EVPN-VXLAN overlay, having access to the frontend
 network and server-to-server network, and are additionally connected to the
 management network.
 
+---
 ## Logical networks { #logical-networks }
 
-![](logical.png)
+![](logical.png){ align=right }
 
 Our logical networks can be implemented as either layer 2 VLANs or virtual
 networks inside an EVPN-VXLAN overlay due to a unified internal numbering
@@ -98,6 +110,7 @@ The routers suppress "martian" traffic which is on the wrong VLAN,
 e.g. frontend traffic injected on the server-to-server network or private
 addresses from the internet.
 
+---
 
 ## Local ports
 
