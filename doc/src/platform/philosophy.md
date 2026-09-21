@@ -4,7 +4,7 @@ global_sync_id: "v1"
 
 # Philosophy
 
-The Flying Circus is a managed, agile platform for hosting Python web
+The Flying Circus is a managed, agile platform for hosting individual web
 applications.
 
 We provide virtual Linux machines enabling developers to use any software they
@@ -23,6 +23,7 @@ customers.
 
 Also, we love every single VM and make sure it is healthy and is performing
 well at any time.
+---
 
 ## Our approach
 
@@ -31,97 +32,97 @@ practices sometimes referred to as [DevOps](https://secure.wikimedia.org/wikiped
 
 To us, the most important aspects are:
 
-Automation
+### Automation
 
-: We automate almost everything: from provisioning physical or virtual
-  machines, to installing packages together with their monitoring
-  configuration, to complete operating system updates.
+We automate almost everything: from provisioning physical or virtual
+machines, to installing packages together with their monitoring
+configuration, to complete operating system updates.
 
-  This speeds up the initial configuration and helps keeping your
-  configuration up-to-date even if your application has been running for
-  months or years.
+This speeds up the initial configuration and helps keeping your
+configuration up-to-date even if your application has been running for
+months or years.
 
-  It also ensures that you profit from new features and bug fixes without
-  having to buy new stuff or hiring us to configure it.
+It also ensures that you profit from new features and bug fixes without
+having to buy new stuff or hiring us to configure it.
 
-  However, if you need something quick, we'll make sure that the automation
-  does not get in your way and will figure something out for you.
+However, if you need something quick, we'll make sure that the automation
+does not get in your way and will figure something out for you.
 
-Virtualisation
+### Virtualisation
 
-: Hardware is expensive, dirty, unreliable, and inflexible. That is why we
-  provide you with virtual machines instead: many things become cheap,
-  clean, reliable and flexible.
+Hardware is expensive, dirty, unreliable, and inflexible. That is why we
+provide you with virtual machines instead: many things become cheap,
+clean, reliable and flexible.
 
-  We take care of all the complicated things related to
-  hardware and in return you get all the good things from virtualised environments:
+We take care of all the complicated things related to
+hardware and in return you get all the good things from virtualised environments:
 
-  - allocating the resources (CPU power, disk, memory) that you actually need
-    and only paying for what you use
-  - adjusting the allocated resources in a timely manner usually in a few
-    minutes or hours
-  - isolating services in  separate machines increases reliability,
-    cleanliness, and flexibility
-  - hardware failures become irrelevant, hardware improvements become
-    available without reinstalling the system
+- allocating the resources (CPU power, disk, memory) that you actually need
+and only paying for what you use
+- adjusting the allocated resources in a timely manner usually in a few
+minutes or hours
+- isolating services in  separate machines increases reliability,
+cleanliness, and flexibility
+- hardware failures become irrelevant, hardware improvements become
+available without reinstalling the system
 
-Continuous improvements
+### Continuous improvements
 
-: When operating a web application today, chances are that you are already
-  continuously improving it.
+When operating a web application today, chances are that you are already
+continuously improving it.
 
-  However, if a server is set up once it will get old and the time will come
-  when your application can not evolve any longer in that crufty, old setup.
+However, if a server is set up once it will get old and the time will come
+when your application can not evolve any longer in that crufty, old setup.
 
-  We continuously keep both your virtual machines and our configurations
-  up to date and introduce new features and technology so that your
-  application will always find a modern, secure environment to work in.
+We continuously keep both your virtual machines and our configurations
+up to date and introduce new features and technology so that your
+application will always find a modern, secure environment to work in.
 
-  In our heavily automated environment we express almost all of our
-  infrastructure as programming code and thus can leverage similar tools
-  that you know from developing your application:
+In our heavily automated environment we express almost all of our
+infrastructure as programming code and thus can leverage similar tools
+that you know from developing your application:
 
-  - checking everything into revision control
-  - making heavy use of testing and quality assurance before rolling
-    anything out into production
-  - being able to revert back to or take a look at previous releases
-  - providing change logs
+- checking everything into revision control
+- making heavy use of testing and quality assurance before rolling
+anything out into production
+- being able to revert back to or take a look at previous releases
+- providing change logs
 
-  Also, we'd like to hear from you about what you are missing or what you
-  dream of - there is a good chance that we can help building that.
+Also, we'd like to hear from you about what you are missing or what you
+dream of - there is a good chance that we can help building that.
 
-Monitoring
+### Monitoring
 
-: Something that works today may not work tomorrow.
+Something that works today may not work tomorrow.
 
-  As any application today consists of many parts working together
-  seamlessly nobody can personally keep track of the status of the overall
-  system.
+As any application today consists of many parts working together
+seamlessly nobody can personally keep track of the status of the overall
+system.
 
-  We therefore monitor many parameters of all systems and applications and
-  keep you informed of their current status as well as giving you accesss to
-  the historic data about their availability and their performance.
+We therefore monitor many parameters of all systems and applications and
+keep you informed of their current status as well as giving you accesss to
+the historic data about their availability and their performance.
 
-  In addition to the automatically deployed system checks your application
-  can be monitored closely given that you provide the necessary information
-  to us.
+In addition to the automatically deployed system checks your application
+can be monitored closely given that you provide the necessary information
+to us.
 
-Security
+### Security
 
-: Running your application with a service provider implies that your data
-  (and the data of your customers) is stored at a location that you do not
-  have direct access to.
+Running your application with a service provider implies that your data
+(and the data of your customers) is stored at a location that you do not
+have direct access to.
 
-  To keep your data secure we adhere to industry standard practices as well
-  as Germany's laws about privacy and data protection (one of the most
-  strict laws on this issue in the world).
+To keep your data secure we adhere to industry standard practices as well
+as Germany's laws about privacy and data protection (one of the most
+strict laws on this issue in the world).
 
-  Specifically this means:
+Specifically this means:
 
-  - employing both technical and organisational measures
-  - applying security patches timely
-  - selecting appropriate data centers
-  - [documenting our approach closely](../security/index.md)
+- employing both technical and organisational measures
+- applying security patches timely
+- selecting appropriate data centers
+- [documenting our approach closely](../security/index.md)
 
 % XXX
 %
@@ -133,6 +134,7 @@ Security
 %
 % Small team of specialists
 %     kleines team
+---
 
 ## Our tools
 
@@ -153,7 +155,7 @@ A detailed list of used hardware and software can be provided on request.
 % ip connectivity
 %
 % netzwerk
-
+---
 ## Our offers
 
 For details about our commercial offerings based on the Flying Circus hosting

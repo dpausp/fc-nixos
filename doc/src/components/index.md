@@ -1,5 +1,7 @@
 # Components { #components }
 
+--8<-- "components.md"
+
 All platform components documented in this manual, one page per component; the sidebar navigation groups them by topic.
 
 - [Development Host](devhost.md)

@@ -16,8 +16,8 @@ Explore our core guides, infrastructure concepts, and self-service capabilities:
 | :--- | :--- |
 | **🚀 Getting Started** | [First Steps & Tutorial](./infrastructure/getting-started.md) · [Application Deployments](./platform/deployment/index.md) · [User Accounts & SSH](./platform/users/index.md) |
 | **⚙️ Infrastructure & Core** | [Virtual Machines](./infrastructure/vms.md) · [Dual-Interface Networking](./infrastructure/networking/index.md) · [Block Storage](./infrastructure/block-storage.md) · [Backups](./infrastructure/backup.md) |
-| **☁️ Self-Service** | [S3-Compatible Object Storage](./infrastructure/object-storage.md) · [AI & Machine Learning (LLM-API, Open WebUI etc.)](./infrastructure/ai-ml.md) · [Portal (my.flyingcircus.io)](https://my.flyingcircus.io){:target="_blank"} |
-| **📦 Managed Components** | Ready-to-use environments for PostgreSQL, MariaDB, MySQL, Kubernetes (k3s), NGINX, Redis, OpenSearch, and more. |
+| **☁️ Self-Service** | [Object Storage (S3-Compatible)](./infrastructure/object-storage.md) · [AI & Machine Learning (LLM-API, Open WebUI etc.)](./infrastructure/ai-ml.md) · [Portal (my.flyingcircus.io)](https://my.flyingcircus.io){:target="_blank"} |
+| **📦 Managed Components** | Components (roles) are preconfigured, automated service modules managed by Flying Circus. Ready-to-use environments for e.g. PostgreSQL, MariaDB, MySQL, Kubernetes (k3s), NGINX, Redis, OpenSearch, and [more](components/index.md). |
 
 ---
 

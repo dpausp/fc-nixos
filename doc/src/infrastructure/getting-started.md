@@ -176,7 +176,7 @@ vdb
 ---
 ## Managed Components
 
-Components (roles) are preconfigured, automated service modules managed by Flying Circus on our NixOS-based cloud platform. They serve as building blocks for assembling complex, scalable, and production-ready application environments. Rather than manually installing, configuring, and maintaining software components, developers and administrators can leverage these roles to declaratively provision the desired infrastructure. In projects with a Managed or Guided service level, certain component roles directly impact billing and are therefore marked with a symbol (⚙︎) in the [my.flyingcircus.io portal](https://my.flyingcircus.io/){:target="_blank"}.
+--8<-- "components.md"
 
 Some examples for components we provide:
 

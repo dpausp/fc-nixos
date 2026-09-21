@@ -12,13 +12,13 @@ physical disks, see [data-at-rest-encryption](../security/data-protection.md#dat
 
 Object storage users are managed in our customer portal at [my.flyingcircus.io](https://my.flyingcircus.io) in the "Object Storage users" page of each resource group.
 
-![](../images/infrastructure_object_storage_users_main.png)
+![](../images/infrastructure_object_storage_users_main.png){ align=left }
 
 Click the "Add Object Storage user" button to create a new user. *manager* permission is required for this.
 
 The user id is a suffix appended to the resource group name. It can be used when there are multiple applications in one resource group which should not have access to each others data. The display name is for your discretion to explain the use of the user. If left empty, it defaults to the user id.
 
-![](../images/infrastructure_object_storage_users_add.png)
+![](../images/infrastructure_object_storage_users_add.png){ align=left }
 
 You will be redirected to a page that shows the secret key of the user.
 Secret keys of a user are shown only once. If you loose the secret key, you can rotate the key in the customer portal.
@@ -28,15 +28,15 @@ After a user is created (or the secret is rotated), allow up to 10 minutes for i
 You can see the current status of the user in the portal.
 While the status is pending, it the user will not be available:
 
-![](../images/infrastructure_object_storage_users_main_pending.png)
+![](../images/infrastructure_object_storage_users_main_pending.png){ align=left }
 
 As soon as the status changes to active, it can be used.
 
-![](../images/infrastructure_object_storage_users_main_active.png)
+![](../images/infrastructure_object_storage_users_main_active.png){ align=left }
 
 ---
 
-## Access the object storage
+## Access the object storage { style="clear: both" }
 
 After the user is active, you can connect to the storage using the corresponding access key and secret key.
 
